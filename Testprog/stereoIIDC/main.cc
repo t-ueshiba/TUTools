@@ -105,23 +105,21 @@ main(int argc, char* argv[])
     typedef GFStereo<float,  u_char>	GFStereoType;
 #endif
 
-    bool		gfstereo		= false;
-    const char*		cameraName		= IIDCCameraArray
-						::DEFAULT_CAMERA_NAME;
-    const char*		configDirs		= "/usr/local/etc/cameras";
-    string		paramFile		= DEFAULT_PARAM_FILE;
-    double		scale			= DEFAULT_SCALE;
-    bool		textureMapping		= false;
-    double		parallax		= -1.0;
-    IIDCCamera::Speed	speed			= IIDCCamera::SPD_400M;
-    size_t		grainSize		= DEFAULT_GRAINSIZE;
-    bool		sync			= false;
-    float		shutter			= 0.002;
-    float		frameRate		= 50.0;
+    bool	gfstereo	= false;
+    const char*	cameraName	= IIDCCameraArray::DEFAULT_CAMERA_NAME;
+    const char*	configDirs	= "/usr/local/etc";
+    string	paramFile	= DEFAULT_PARAM_FILE;
+    double	scale		= DEFAULT_SCALE;
+    bool	textureMapping	= false;
+    double	parallax	= -1.0;
+    size_t	grainSize	= DEFAULT_GRAINSIZE;
+    bool	sync		= false;
+    float	shutter		= 0.002;
+    float	frameRate	= 50.0;
     
   // コマンド行の解析．
     extern char*	optarg;
-    for (int c; (c = getopt(argc, argv, "Gc:Bp:s:xq:g:Sh")) != -1; )
+    for (int c; (c = getopt(argc, argv, "Gc:p:s:xq:g:Sh")) != -1; )
 	switch (c)
 	{
 	  case 'G':
@@ -129,9 +127,6 @@ main(int argc, char* argv[])
 	    break;
 	  case 'c':
 	    cameraName = optarg;
-	    break;
-	  case 'B':
-	    speed = IIDCCamera::SPD_800M;
 	    break;
 	  case 'p':
 	    paramFile = optarg;
@@ -186,8 +181,8 @@ main(int argc, char* argv[])
 	    throw runtime_error("No appropriate visual!!");
 #endif
       // IIDCカメラのオープン．
-	IIDCCameraArray	cameras;
-	cameras.restore(cameraName, speed);
+	IIDCCameraArray	cameras(cameraName);
+	cameras.restore();
 
       // カメラの同期設定
 	if (sync)

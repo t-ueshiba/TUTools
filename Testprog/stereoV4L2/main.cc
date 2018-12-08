@@ -104,18 +104,17 @@ main(int argc, char* argv[])
     typedef GFStereo<float,  u_char>	GFStereoType;
 #endif
 
-    bool		gfstereo		= false;
-    bool		doHorizontalBackMatch	= true;
-    bool		doVerticalBackMatch	= true;
-    const char*		cameraName		= V4L2CameraArray
-						::DEFAULT_CAMERA_NAME;
-    const char*		configDirs		= "/usr/local/etc/cameras";
-    string		paramFile		= DEFAULT_PARAM_FILE;
-    double		scale			= DEFAULT_SCALE;
-    bool		textureMapping		= false;
-    double		parallax		= -1.0;
-    size_t		grainSize		= DEFAULT_GRAINSIZE;
-    bool		sync			= false;
+    bool	gfstereo		= false;
+    bool	doHorizontalBackMatch	= true;
+    bool	doVerticalBackMatch	= true;
+    const char*	cameraName		= V4L2CameraArray::DEFAULT_CAMERA_NAME;
+    const char*	configDirs		= "/usr/local/etc";
+    string	paramFile		= DEFAULT_PARAM_FILE;
+    double	scale			= DEFAULT_SCALE;
+    bool	textureMapping		= false;
+    double	parallax		= -1.0;
+    size_t	grainSize		= DEFAULT_GRAINSIZE;
+    bool	sync			= false;
     
   // コマンド行の解析．
     extern char*	optarg;
@@ -187,8 +186,8 @@ main(int argc, char* argv[])
 	    throw runtime_error("No appropriate visual!!");
 #endif
       // V4L2カメラのオープン．
-	V4L2CameraArray	cameras;
-	cameras.restore(cameraName);
+	V4L2CameraArray	cameras(cameraName);
+	cameras.restore();
 	
       // ステレオマッチングパラメータの読み込み．
 	ifstream	in;

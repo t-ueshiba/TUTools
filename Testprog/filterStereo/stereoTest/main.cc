@@ -10,7 +10,7 @@
 #include "TU/StereoUtility.h"
 
 #define DEFAULT_PARAM_FILE	"stereo"
-#define DEFAULT_CONFIG_DIRS	".:/usr/local/etc/cameras"
+#define DEFAULT_CONFIG_DIRS	".:/usr/local/etc"
 #define DEFAULT_SCALE		1.0
 #define DEFAULT_GRAINSIZE	50
 
