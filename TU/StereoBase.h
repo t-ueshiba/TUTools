@@ -16,7 +16,6 @@
 #endif
 
 #include "TU/simd/Array++.h"
-#include "TU/iterator.h"
 #include "TU/Profiler.h"
 
 #if defined(PROFILE) && !defined(USE_TBB)
