@@ -36,8 +36,17 @@ class Quaternion : boost::field_operators<Quaternion<T> >
 			Quaternion(const scalar_type& s,
 				   const vector_type& v)
 			    :_s(s), _v(v)				{}
-    template <class T_>	Quaternion(const Vector<T_, 4>& a)
-			    :_s(a[0]), _v({a[1], a[2], a[3]})		{}
+
+    template <class E_, std::enable_if_t<rank<E_>() == 1>* = nullptr>
+			Quaternion(const E_& expr)
+			{
+			    if (size<0>(expr) != 4)
+				throw std::invalid_argument("TU::Quaternion::Quaternion(): input vector must be of size 4!");
+
+			    _s = expr[0];
+			    _v = {expr[1], expr[2], expr[3]};
+			}
+    
     template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
 			Quaternion(const E_& expr)
 			{
@@ -167,6 +176,18 @@ class Quaternion : boost::field_operators<Quaternion<T> >
 			    rotation_angle(Rt(), roll, pitch, yaw);
 
 			    return {roll, pitch, yaw};
+			}
+
+    scalar_type		theta() const
+			{
+			    return 2 * std::acos(_s);
+			}
+    
+    vector_type		n() const
+			{
+			    auto	v = _v;
+			    v.normalize();
+			    return v;
 			}
 
     std::ostream&	put(std::ostream& out) const

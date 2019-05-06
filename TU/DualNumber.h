@@ -106,7 +106,7 @@ class DualNumber : boost::field_operators<DualNumber<T> >
 template <class T> inline DualNumber<T>
 square(const DualNumber<T>& x)
 {
-    return {square(x.primary()), 2 * x.primary() * x.dual()};
+    return {square(x.primary()), x.primary()*x.dual() + x.dual()*x.primary()};
 }
     
 template <class T> inline DualNumber<T>

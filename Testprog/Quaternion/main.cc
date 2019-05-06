@@ -63,8 +63,6 @@ doJob1()
 {
     for (;;)
     {
-	const auto	degree = 180 / M_PI;
-	
 	std::cerr << "q >> ";
 	char	c;
 	if (!(std::cin >> c))
