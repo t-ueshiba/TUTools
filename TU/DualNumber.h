@@ -30,6 +30,16 @@ class DualNumber : boost::field_operators<DualNumber<T> >
 				   const value_type& d=value_type())
 			    :_p(p), _d(d)			{}
     
+    template <class E_, std::enable_if_t<rank<E_>() == 1>* = nullptr>
+    explicit		DualNumber(const E_& expr)
+			{
+			    if (size<0>(expr) != 2)
+				throw std::invalid_argument("TU::DualNumber::DualNumber(): input vector must be of size 2!");
+
+			    _p = expr[0];
+			    _d = expr[1];
+			}
+    
     const value_type&	primary()			const	{ return _p; }
     void		primary(const value_type& p)		{ _p = p; }
     const value_type&	dual()				const	{ return _d; }
