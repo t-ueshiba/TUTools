@@ -31,7 +31,7 @@ class DualNumber : boost::field_operators<DualNumber<T> >
 			    :_p(p), _d(d)			{}
     
     template <class E_, std::enable_if_t<rank<E_>() == 1>* = nullptr>
-    explicit		DualNumber(const E_& expr)
+			DualNumber(const E_& expr)
 			{
 			    if (size<0>(expr) != 2)
 				throw std::invalid_argument("TU::DualNumber::DualNumber(): input vector must be of size 2!");

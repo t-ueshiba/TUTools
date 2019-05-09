@@ -38,7 +38,7 @@ class Quaternion : boost::field_operators<Quaternion<T> >
 			    :_s(s), _v(v)				{}
 
     template <class E_, std::enable_if_t<rank<E_>() == 1>* = nullptr>
-    explicit		Quaternion(const E_& expr)
+			Quaternion(const E_& expr)
 			{
 			    if (size<0>(expr) != 4)
 				throw std::invalid_argument("TU::Quaternion::Quaternion(): input vector must be of size 4!");
@@ -48,7 +48,7 @@ class Quaternion : boost::field_operators<Quaternion<T> >
 			}
     
     template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
-    explicit		Quaternion(const E_& expr)
+			Quaternion(const E_& expr)
 			{
 			    using E = element_t<E_>;
 
