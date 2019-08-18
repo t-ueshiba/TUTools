@@ -1351,6 +1351,7 @@ class Rigidity : public Affinity<T, D, D>
     
     using			typename base_type::element_type;
     using derivative_type	= Array2<element_type, D, NPARAMS>;
+    using derivative0_type	= Array2<element_type, D, DOF>;
 
   //! 入力空間と出力空間の次元を指定して剛体変換オブジェクトを生成する．
   /*!
@@ -1422,7 +1423,19 @@ class Rigidity : public Affinity<T, D, D>
     size_t		ndataMin()				const	;
     template <class T_, size_t D_>
     derivative_type	derivative(const Array<T_, D_>& x)	const	;
+    template <size_t D_=D>
+    static std::enable_if_t<D_ == 2, derivative0_type>
+			derivative0(element_type u, element_type v)
+			{
+			    constexpr element_type	_0 = 0;
+			    constexpr element_type	_1 = 1;
+
+			    return {{_1, _0, -v}, {_0, _1,  u}};
+			}
     void		update(const Array<element_type, NPARAMS>& dt)	;
+    template <size_t D_=D>
+    std::enable_if_t<D_ == 2>
+			compose(const Array<element_type, DOF>& dt)	;
 };
 
 //! 与えられた点対列の非同次座標から剛体変換を計算する．
@@ -1514,7 +1527,7 @@ Rigidity<T, D>::ndataMin() const
 /*!
   ヤコビ行列とは並進/回転パラメータに関する1階微分のことである．
   \param x	点の非同次座標(dim() 次元)または同次座標(dim()+1 次元)
-  \return	dim()xdim() x (dim()+1)/2 ヤコビ行列
+  \return	dim() x (dim()x(dim()+1))/2 ヤコビ行列
 */
 template <class T, size_t D> template <class T_, size_t D_> auto
 Rigidity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
@@ -1572,6 +1585,25 @@ Rigidity<T, D>::update(const Array<element_type, NPARAMS>& dt)
     }
 }
 
+template <class T, size_t D> template <size_t D_>
+inline std::enable_if_t<D_ == 2>
+Rigidity<T, D>::compose(const Array<element_type, DOF>& dt)
+{
+    const auto	Rt = rotation(dt[2]);
+    
+    auto	r0 = (*this)[0][0];
+    auto	r1 = (*this)[0][1];
+    (*this)[0][0]  = r0*Rt[0][0] + r1*Rt[1][0];
+    (*this)[0][1]  = r0*Rt[0][1] + r1*Rt[1][1];
+    (*this)[0][2] -= ((*this)[0][0]*dt[0] + (*this)[0][1]*dt[1]);
+    
+    r0 = (*this)[1][0];
+    r1 = (*this)[1][1];
+    (*this)[1][0]  = r0*Rt[0][0] + r1*Rt[1][0];
+    (*this)[1][1]  = r0*Rt[0][1] + r1*Rt[1][1];
+    (*this)[1][2] -= ((*this)[1][0]*dt[0] + (*this)[1][1]*dt[1]);
+}
+    
 template <class T> using Rigidity2	= Rigidity<T, 2>;
 template <class T> using Rigidity3	= Rigidity<T, 3>;
 
