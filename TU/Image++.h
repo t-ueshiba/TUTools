@@ -1538,7 +1538,7 @@ ImageBase<IMAGE>::restorePBMHeader(std::istream& in)
 	}
     }
     in.putback(c);
-#  ifndef __NVCC__	// nvcc-9.2.88 cannot compile Camera++.h.
+
     if (legacy)
     {
 	Camera<Intrinsic<double> >	camera(P);
@@ -1546,7 +1546,7 @@ ImageBase<IMAGE>::restorePBMHeader(std::istream& in)
 	d1 *= (k * k);
 	d2 *= (k * k * k * k);
     }
-#  endif
+
     size_t	w, h;
     in >> w >> h;
     resize(h, w, type);				// set width & height

@@ -20,7 +20,7 @@ warp(const Image<T>& src, double du, double dv, double theta)
     Htinv[2][0] = -du;
     Htinv[2][1] = -dv;
     Htinv[2][2] = 1.0;
-	
+
     Image<T>	dst(src.width(), src.height());
     Warp	warp;
     warp.initialize(Htinv,
@@ -42,7 +42,7 @@ registerImages(const Image<T>& src, const Image<T>& dst,
     params.newton	   = newton;
     params.intensityThresh = thresh;
     params.niter_max	   = 200;
-    
+
   // à íuçáÇÌÇπÇé¿çsÅD
     ICIA<Map>	registration(params);
     registration.initialize(src);
@@ -53,7 +53,7 @@ registerImages(const Image<T>& src, const Image<T>& dst,
 
     registration.print(cerr);
 }
-    
+
 }
 
 /************************************************************************
@@ -68,7 +68,7 @@ main(int argc, char* argv[])
     typedef float	T;
 
     const double	DegToRad = M_PI / 180.0;
-    enum Algorithm	{PROJECTIVE, AFFINE};
+    enum Algorithm	{PROJECTIVE, AFFINE, RIGID};
     Algorithm		algorithm = PROJECTIVE;
     double		du = 0.0, dv = 0.0, theta = 0.0;
     T			thresh = 15.0;
@@ -76,11 +76,14 @@ main(int argc, char* argv[])
     size_t		u0 = 0, v0 = 0;
     size_t		w = 0, h = 0;
     extern char		*optarg;
-    for (int c; (c = getopt(argc, argv, "Au:v:t:nU:V:W:H:T:")) != -1; )
+    for (int c; (c = getopt(argc, argv, "ARu:v:t:nU:V:W:H:T:")) != -1; )
 	switch (c)
 	{
 	  case 'A':
 	    algorithm = AFFINE;
+	    break;
+	  case 'R':
+	    algorithm = RIGID;
 	    break;
 	  case 'u':
 	    du = atof(optarg);
@@ -110,7 +113,7 @@ main(int argc, char* argv[])
 	    thresh = atof(optarg);
 	    break;
 	}
-    
+
     try
     {
 	cerr << "Restoring image...";
@@ -122,7 +125,7 @@ main(int argc, char* argv[])
 	    u0 = 0;
 	if (v0 >= src.height())
 	    v0 = 0;
-    
+
  	if (w == 0)
 	    w = src.width();
 	if (h == 0)
@@ -135,9 +138,13 @@ main(int argc, char* argv[])
 	cerr << "Warping image...";
 	Image<u_char>	dst = warp(src, du, dv, theta);
 	cerr << "done." << endl;
-	
+
 	switch (algorithm)
 	{
+	  case RIGID:
+	    registerImages<Rigidity2<T> >(src, dst, u0, v0, w, h,
+					 thresh, newton);
+	    break;
 	  case AFFINE:
 	    registerImages<Affinity22<T> >(src, dst, u0, v0, w, h,
 					  thresh, newton);

@@ -1640,6 +1640,17 @@ quaternion(const E& expr)
     return q;
 }
 
+//! 2次元回転行列を生成する．
+/*!
+  \param theta	回転角
+  \return	生成された回転行列，すなわち
+		\f[
+		  \TUtvec{R}{} \equiv
+		  \TUbeginarray{cc}
+		  \cos\theta & \sin\theta \\ -\sin\theta & \cos\theta
+		  \TUendarray
+		\f]
+*/
 template <class T>
 inline std::enable_if_t<std::is_floating_point<T>::value, Array2<T, 2, 2> >
 rotation(T theta)
@@ -1648,6 +1659,42 @@ rotation(T theta)
     Qt[0][0] = Qt[1][1] = std::cos(theta);
     Qt[0][1] = std::sin(theta);
     Qt[1][0] = -Qt[0][1];
+
+    return Qt;
+}
+
+//! 3次元回転行列を生成する．
+/*!
+  \param theta_x	x軸まわりの回転角
+  \param theta_y	y軸まわりの回転角
+  \param theta_z	z軸まわりの回転角
+  \return		生成された回転行列，すなわち
+			\f[
+			\TUtvec{R}{} \equiv \TUtvec{R}{x}(\theta_x)
+			\TUtvec{R}{y}(\theta_y)\TUtvec{R}{z}(\theta_z)
+			\f]
+*/
+template <class T>
+inline std::enable_if_t<std::is_floating_point<T>::value, Array2<T, 3, 3> >
+rotation(T theta_x, T theta_y, T theta_z)
+{
+    const auto	cx = std::cos(theta_x);
+    const auto	sx = std::sin(theta_x);
+    const auto	cy = std::cos(theta_y);
+    const auto	sy = std::sin(theta_y);
+    const auto	cz = std::cos(theta_z);
+    const auto	sz = std::sin(theta_z);
+    
+    Array2<T, 3, 3>	Qt;
+    Qt[0][0] =  cy * cz;
+    Qt[0][1] =  cy * sz;
+    Qt[0][2] = -sy;
+    Qt[1][0] =  sx * sy * cz - cx * sz;
+    Qt[1][1] =  sx * sy * sz + cx * cz;
+    Qt[1][2] =	sx * cy;
+    Qt[2][0] =  cx * sy * cz + sx * sz;
+    Qt[2][1] =  cx * sy * sz - sx * cz;
+    Qt[2][2] =	cx * cy;
 
     return Qt;
 }
