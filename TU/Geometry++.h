@@ -922,11 +922,11 @@ Projectivity<T, DO, DI>::jacobian(const Array<T_, D_>& x) const -> jacobian_type
     return J;
 }
     
-//! 与えられた点におけるヤコビ行列を返す．
+//! 与えられた点における1階微分行列を返す．
 /*!
-  ヤコビ行列とは射影変換行列成分に関する1階微分のことである．
+  変換された点の射影変換行列成分に関する1階微分を計算する．
   \param x	点の非同次座標(inDim() 次元)または同次座標(inDim()+1 次元)
-  \return	outDim() x ((outDim()+1)x(inDim()+1)) ヤコビ行列
+  \return	outDim() x ((outDim()+1)x(inDim()+1)) 1階微分行列
 */
 template <class T, size_t DO, size_t DI> template <class T_, size_t D_> auto
 Projectivity<T, DO, DI>::derivative(const Array<T_, D_>& x) const
@@ -1171,8 +1171,7 @@ class Affinity : public Projectivity<T, DO, DI>
   /*! 
     \return	outDim() x inDim() 行列
   */
-    auto	A()	const	{return base_type::operator ()(0, outDim(),
-							       0, inDim());}
+    auto	A()	const	{return slice(*this, 0, outDim(), 0, inDim());}
     auto	b()	const	;
 };
 
@@ -1273,11 +1272,11 @@ Affinity<T, DO, DI>::operator ()(element_type u, element_type v) const
 		       (*this)[1][0]*u + (*this)[1][1]*v + (*this)[1][2]});
 }
 
-//! 与えられた点におけるヤコビ行列を返す．
+//! 与えられた点における1階微分行列を返す．
 /*!
-  ヤコビ行列とはアフィン変換行列成分に関する1階微分のことである．
+  変換された点のアフィン変換行列成分に関する1階微分を計算する．
   \param x	点の非同次座標(inDim() 次元)または同次座標(inDim()+1次元)
-  \return	outDim() x (outDim()x(inDim()+1)) ヤコビ行列
+  \return	outDim() x (outDim()x(inDim()+1)) 1階微分行列
 */
 template <class T, size_t DO, size_t DI> template <class T_, size_t D_> auto
 Affinity<T, DO, DI>::derivative(const Array<T_, D_>& x) const -> derivative_type
@@ -1330,6 +1329,339 @@ template <class T> using Affinity23	= Affinity<T, 2, 3>;
 template <class T> using Affinity33	= Affinity<T, 3, 3>;
 
 /************************************************************************
+*  class Similarity<T, D>						*
+************************************************************************/
+//! 相似変換を行うクラス
+/*!
+  回転行列\f$\TUvec{R}{} \in \TUspace{SO}{n}\f$と
+  \f$\TUvec{t}{} \in \TUspace{R}{n}\f$を用いてm次元空間の点
+  \f$\TUvec{x}{} \in \TUspace{R}{n}\f$をn次元空間の点
+  \f$\TUvec{y}{} = s\TUvec{R}{}\TUvec{x}{} + \TUvec{t}{}
+  \in \TUspace{R}{n}\f$に写す．
+*/
+template <class T, size_t D>
+class Similarity : public Affinity<T, D, D>
+{
+  public:
+    using			base_type = Affinity<T, D, D>;
+
+    constexpr static size_t	NPARAMS = D*(D+1)/2 + 1;
+    constexpr static size_t	DOF	= NPARAMS;
+    
+    using			typename base_type::element_type;
+    using derivative_type	= Array2<element_type, D, NPARAMS>;
+    using derivative0_type	= Array2<element_type, D, DOF>;
+
+  //! 入力空間と出力空間の次元を指定して相似変換オブジェクトを生成する．
+  /*!
+    恒等変換として初期化される．
+    \param d	入力/出力空間の次元
+  */
+    explicit	Similarity(size_t d=D) :base_type(d, d)	{}
+
+  //! 与えられた点対列の非同次座標から相似変換オブジェクトを生成する．
+  /*!
+    \param begin			点対列の先頭を示す反復子
+    \param end				点対列の末尾を示す反復子
+    \throw std::invalid_argument	点対の数が ndataMin() に満たない場合に送出
+  */
+    template <class ITER_>
+			Similarity(ITER_ begin, ITER_ end)
+			{
+			    fit(begin, end);
+			}
+
+  //! 変換行列を指定して相似変換オブジェクトを生成する．
+  /*!
+    \param T	(d+1) x (d+1)行列(dは入力/出力空間の次元)
+  */
+    template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
+			Similarity(const E_& expr)
+			    :base_type(expr)
+			{
+			}
+
+  //! 変換行列を指定する．
+  /*!
+    \param T	(d+1) x (d+1) 行列(dは入力/出力空間の次元)
+  */
+    template <class E_> std::enable_if_t<rank<E_>() == 2, Similarity&>
+			operator =(const E_& expr)
+			{
+			    if (TU::size<0>(expr) != TU::size<1>(expr))
+				throw std::invalid_argument("Similarity::set(): non-square matrix!!");
+			    base_type::operator =(expr);
+			    return *this;
+			}
+
+    using		base_type::inDim;
+    using		base_type::outDim;
+    using		base_type::operator ();
+
+  //! この相似変換の入力/出力空間の次元を返す．
+  /*! 
+    \return	入力/出力空間の次元(同次座標のベクトルとしての次元は dim()+1)
+  */
+    size_t		dim()		const	{ return inDim(); };
+    
+    auto		s()		const	;
+    auto		R()		const	;
+
+  //! この相似変換の回転部分を表現する回転行列を返す．
+  /*! 
+    \return	dim() x dim() 行列
+  */
+    auto		sR()		const	{ return base_type::A(); }
+
+  //! この相似変換の並行移動部分を表現するベクトルを返す．
+  /*! 
+    \return	dim() 次元ベクトル
+  */
+    auto		t()		const	{ return base_type::b(); }
+
+    template <class ITER_>
+    void		fit(ITER_ begin, ITER_ end)			;
+    Similarity		inverse()				const	;
+    size_t		nparams()				const	;
+    size_t		ndataMin()				const	;
+    template <class T_, size_t D_>
+    derivative_type	derivative(const Array<T_, D_>& x)	const	;
+    template <size_t D_=D>
+    static std::enable_if_t<D_ == 2, derivative0_type>
+			derivative0(element_type u, element_type v)
+			{
+			    constexpr element_type	_0 = 0;
+			    constexpr element_type	_1 = 1;
+
+			    return {{_1, _0, -v}, {_0, _1,  u}};
+			}
+    void		update(const Array<element_type, NPARAMS>& dt)	;
+    template <size_t D_=D>
+    std::enable_if_t<D_ == 2>
+			compose(const Array<element_type, DOF>& dt)	;
+};
+
+//! この相似変換のスケーリング係数を返す．
+/*! 
+  \return	スケーリング係数
+*/
+template<class T, size_t D> inline auto
+Similarity<T, D>::s() const
+{
+    return length(slice((*this)[0], 0, dim()));
+}
+
+//! この相似変換の回転部分を表現する回転行列を返す．
+/*! 
+  \return	dim() x dim() 行列
+*/
+template<class T, size_t D> inline auto
+Similarity<T, D>::R() const
+{
+    Matrix<T, D, D>	RR = sR();
+    RR /= s();
+
+    return RR;
+}
+
+    
+//! 与えられた点対列の非同次座標から相似変換を計算する．
+/*!
+  \param begin			点対列の先頭を示す反復子
+  \param end			点対列の末尾を示す反復子
+  \throw std::invalid_argument	点対の数が ndataMin() に満たない場合に送出
+*/
+template<class T, size_t D> template <class ITER_> void
+Similarity<T, D>::fit(ITER_ begin, ITER_ end)
+{
+  // 充分な個数の点対があるか？
+    const size_t	ndata = std::distance(begin, end);
+    if (ndata == 0)		// beginが有効か？
+	throw std::invalid_argument("Similarity::fit(): 0-length input data!!");
+    const auto		d = begin->first.size();
+    if (begin->second.size() != d)
+	throw std::invalid_argument("Similarity::fit(): input data contains a pair of different dimensions!!");
+    if (ndata < d)		// 行列のサイズが未定なのでndataMin()は無効
+	throw std::invalid_argument("Similarity::fit(): not enough input data!!");
+
+  // 重心の計算
+    Array<element_type, D>	xc(d), yc(d);
+    for (auto corres = begin; corres != end; ++corres)
+    {
+	xc += corres->first;
+	yc += corres->second;
+    }
+    xc /= ndata;
+    yc /= ndata;
+    
+  // モーメント行列の計算
+    Matrix<element_type, D, D>	M(d, d);
+    for (auto corres = begin; corres != end; ++corres)
+	M += (corres->first - xc) % (corres->second - yc);
+
+  // モーメント行列の特異値がすべて正であることを確認
+    SVDecomposition<element_type>	svd(M);
+    for (auto sigma : svd.diagonal())
+	if (sigma <= 0)
+	    throw std::runtime_error("Similarity::fit(): non-positive singula value!!");
+    
+  // スケールの計算
+    element_type	sqr_x = 0;
+    for (auto corres = begin; corres != end; ++corres)
+	sqr_x += square(corres->first - xc);
+    element_type	scale = 0;
+    for (auto sigma : svd.diagonal())
+	scale += sigma;
+    scale /= sqr_x;
+    
+  // 点群間の相似変換の計算
+    base_type::resize(d + 1, d + 1);
+    slice(*this, 0, d, 0, d) = scale * transpose(svd.Ut()) * svd.Vt();
+    for (size_t i = 0; i < d; ++i)
+	(*this)[i][d] = yc[i] - slice((*this)[i], 0, d) * xc;
+    (*this)[d][d] = 1;
+}
+
+//! この相似変換の逆変換を返す．
+/*!
+  \return	逆変換
+*/
+template <class T, size_t D> inline Similarity<T, D>
+Similarity<T, D>::inverse() const
+{
+    Similarity	Tinv(inDim());
+
+    const auto	sqinv_s = 1 / square(slice((*this)[0], 0, dim()));
+    for (size_t i = 0; i < dim(); ++i)
+	for (size_t j = 0; j < dim(); ++j)
+	    Tinv[j][i] = sqinv_s * (*this)[i][j];
+
+    Vector<element_type, D>	tt = t();
+    for (size_t j = 0; j < dim(); ++j)
+	Tinv[j][dim()] = -(slice(Tinv[j], 0, dim()) * tt);
+
+    return Tinv;
+}
+    
+//! この相似変換の独立なパラメータ数を返す．
+/*!
+  相似変換の独立なパラメータ数すなわち変換の自由度数に一致する．
+  \return	相似変換のパラメータ数(dim() x (dim()+1))/2
+*/
+template <class T, size_t D> inline size_t
+Similarity<T, D>::nparams() const
+{
+    return (dim()*(dim() + 1))/2 + 1;
+}
+
+//! 相似変換を求めるために必要な点対の最小個数を返す．
+/*!
+  現在設定されている空間の次元をもとに計算される．
+  \return	必要な点対の最小個数すなわち空間の次元mに対してm
+*/
+template<class T, size_t D> inline size_t
+Similarity<T, D>::ndataMin() const
+{
+    return dim();
+}
+
+//! 与えられた点における1階微分行列を返す．
+/*!
+  変換された点の並進/回転/スケーリングパラメータに関する1階微分を計算する．
+  \param x	点の非同次座標(dim() 次元)または同次座標(dim()+1 次元)
+  \return	dim() x ((dim()x(dim()+1))/2 + 1)1階微分行列
+*/
+template <class T, size_t D> template <class T_, size_t D_> auto
+Similarity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
+{
+    Array<element_type, D>	xx;
+    if (x.size() == dim())
+	xx = x;
+    else
+	xx = inhomogeneous(x);
+    
+    derivative_type	J(dim(), nparams());
+    
+    switch (dim())
+    {
+      case 2:
+	J[0][0] = J[1][1] = 1;
+	J[0][2] = -(slice<2>((*this)[1], 0) * xx);
+	J[1][2] =   slice<2>((*this)[0], 0) * xx;
+	break;
+      case 3:
+      {
+	J[0][0] = J[1][1] = J[2][2] = 1;
+	const Vector<element_type, D>	sRx = sR() * xx;
+	slice<3, 3>(J, 0, 3) = skew(sRx);
+	const auto	scale = s();
+	J[0][6] = sRx[0] / scale;
+	J[1][6] = sRx[1] / scale;
+	J[2][6] = sRx[2] / scale;
+	break;
+      }
+      default:
+	throw std::runtime_error("Similarity<T, D>::jacobian(): sorry, not implemented yet...");
+    }
+
+    return J;
+}
+    
+//! 相似変換行列を与えられた量だけ修正する．
+/*!
+  \param dt	修正量を表すベクトル(dim() x (dim()+1)/2 次元)
+*/
+template <class T, size_t D> void
+Similarity<T, D>::update(const Array<element_type, NPARAMS>& dt)
+{
+    const auto	scale = s();
+    
+    switch (dim())
+    {
+      case 2:
+	(*this)[0][dim()] -= dt[0];
+	(*this)[1][dim()] -= dt[1];
+	slice<2, 2>(*this, 0, 0) = evaluate((1 - dt[3]/scale) *
+					    rotation(-dt[2]) *
+					    slice<2, 2>(*this, 0, 0));
+	break;
+      case 3:
+	(*this)[0][dim()] -= dt[0];
+	(*this)[1][dim()] -= dt[1];
+	(*this)[2][dim()] -= dt[2];
+	slice<3, 3>(*this, 0, 0) = evaluate((1 - dt[6]/scale) *
+					    rotation(-dt(3, 3)) *
+					    slice<3, 3>(*this, 0, 0));
+	break;
+      default:
+	throw std::runtime_error("Similarity<T, D>::update(): sorry, not implemented yet...");
+    }
+}
+
+template <class T, size_t D> template <size_t D_>
+inline std::enable_if_t<D_ == 2>
+Similarity<T, D>::compose(const Array<element_type, DOF>& dt)
+{
+    const auto	Rt = rotation(dt[2]);
+    const auto	k  = (1 - dt[3]/s());
+    
+    auto	r0 = (*this)[0][0];
+    auto	r1 = (*this)[0][1];
+    (*this)[0][0]  = k * (r0*Rt[0][0] + r1*Rt[1][0]);
+    (*this)[0][1]  = k * (r0*Rt[0][1] + r1*Rt[1][1]);
+    (*this)[0][2] -= ((*this)[0][0]*dt[0] + (*this)[0][1]*dt[1]);
+    
+    r0 = (*this)[1][0];
+    r1 = (*this)[1][1];
+    (*this)[1][0]  = k * (r0*Rt[0][0] + r1*Rt[1][0]);
+    (*this)[1][1]  = k * (r0*Rt[0][1] + r1*Rt[1][1]);
+    (*this)[1][2] -= ((*this)[1][0]*dt[0] + (*this)[1][1]*dt[1]);
+}
+    
+template <class T> using Similarity2	= Similarity<T, 2>;
+template <class T> using Similarity3	= Similarity<T, 3>;
+
+/************************************************************************
 *  class Rigidity<T, D>							*
 ************************************************************************/
 //! 剛体変換を行うクラス
@@ -1337,7 +1669,7 @@ template <class T> using Affinity33	= Affinity<T, 3, 3>;
   回転行列\f$\TUvec{R}{} \in \TUspace{SO}{n}\f$と
   \f$\TUvec{t}{} \in \TUspace{R}{n}\f$を用いてm次元空間の点
   \f$\TUvec{x}{} \in \TUspace{R}{n}\f$をn次元空間の点
-  \f$\TUvec{y}{} \simeq \TUvec{R}{}\TUvec{x}{} + \TUvec{t}{}
+  \f$\TUvec{y}{} = \TUvec{R}{}\TUvec{x}{} + \TUvec{t}{}
   \in \TUspace{R}{n}\f$に写す．
 */
 template <class T, size_t D>
@@ -1468,12 +1800,17 @@ Rigidity<T, D>::fit(ITER_ begin, ITER_ end)
     yc /= ndata;
     
   // モーメント行列の計算
-    Matrix<element_type, D, D>	A(d, d);
+    Matrix<element_type, D, D>	M(d, d);
     for (auto corres = begin; corres != end; ++corres)
-	A += (corres->first - xc) % (corres->second - yc);
+	M += (corres->first - xc) % (corres->second - yc);
 
+  // モーメント行列の特異値がすべて正であることを確認
+    SVDecomposition<element_type>	svd(M);
+    for (auto sigma : svd.diagonal())
+	if (sigma <= 0)
+	    throw std::runtime_error("Similarity::fit(): non-positive singula value!!");
+    
   // 点群間の剛体変換の計算
-    SVDecomposition<element_type>	svd(A);
     base_type::resize(d + 1, d + 1);
     (*this)(0, d, 0, d) = transpose(svd.Ut()) * svd.Vt();
     for (size_t i = 0; i < d; ++i)
@@ -1523,11 +1860,11 @@ Rigidity<T, D>::ndataMin() const
     return dim();
 }
 
-//! 与えられた点におけるヤコビ行列を返す．
+//! 与えられた点における1階微分行列を返す．
 /*!
-  ヤコビ行列とは並進/回転パラメータに関する1階微分のことである．
+  1階微分行列とは並進/回転パラメータに関する1階微分のことである．
   \param x	点の非同次座標(dim() 次元)または同次座標(dim()+1 次元)
-  \return	dim() x (dim()x(dim()+1))/2 ヤコビ行列
+  \return	dim() x (dim()x(dim()+1))/2 1階微分行列
 */
 template <class T, size_t D> template <class T_, size_t D_> auto
 Rigidity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
