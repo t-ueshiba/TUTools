@@ -18,7 +18,7 @@ template <class T> using Point2	 = Array<T, 2>;	//!< 非同次2次元点
 template <class T> using Point2P = Array<T, 3>;	//!< 同次2次元点
 template <class T> using Point3	 = Array<T, 3>;	//!< 非同次3次元点
 template <class T> using Point3P = Array<T, 4>;	//!< 同次3次元点
-    
+
 using Point2s	= Point2<short>;		//!< short型座標を持つ2次元点
 using Point2i	= Point2<int>;			//!< int型座標を持つ2次元点
 using Point2f	= Point2<float>;		//!< float型座標を持つ2次元点
@@ -163,7 +163,7 @@ template <class T> int
 angle(const Point2<T>& p, const Point2<T>& q, const Point2<T>& r)
 {
     int dq = direction(p, q), ang = direction(q, r);
-    
+
     if (dq == 4 || ang == 4)
         return 4;
     else if ((ang -= dq) > 3)
@@ -206,12 +206,12 @@ class Normalize
 {
   private:
     constexpr static size_t	D1 = (D == 0 ? 0 : D + 1);
-    
+
   public:
     using element_type	= S;
     using point_type	= Array<element_type, D>;
     using matrix_type	= Matrix<element_type, D1, D1>;
-    
+
   public:
   //! 空間の次元を指定して正規化変換オブジェクトを生成する．
   /*!
@@ -229,12 +229,12 @@ class Normalize
     template <class ITER_>
     Normalize(ITER_ begin, ITER_ end)
 	:_npoints(0), _scale(1.0), _centroid()	{ insert(begin, end); }
-    
+
     template <class ITER_>
     void		insert(ITER_ begin, ITER_ end)	;
 
   //! この正規化変換が適用される空間の次元を返す．
-  /*! 
+  /*!
     \return	空間の次元(同次座標のベクトルとしての次元は spaceDim()+1)
   */
     size_t		spaceDim()	const	{ return _centroid.size(); }
@@ -261,7 +261,7 @@ class Normalize
 			{
 			    return homogeneous((*this)(x));
 			}
-    
+
     matrix_type		T()		const	;
     matrix_type		Tt()		const	;
     matrix_type		Tinv()		const	;
@@ -278,7 +278,7 @@ class Normalize
     \return	平行移動成分(与えられた点列の重心)
   */
     const point_type&	centroid()	const	{return _centroid;}
-    
+
   private:
     size_t		_npoints;	//!< これまでに与えた点の総数
     element_type	_scale;		//!< これまでに与えた点の振幅のRMS値
@@ -301,7 +301,7 @@ Normalize<S, D>::insert(ITER_ begin, ITER_ end)
 	    throw std::invalid_argument("Normalize::insert(): 0-length input data!!");
 	_centroid.resize(begin->size());	// 点の次元を設定
     }
-    
+
     _scale = _npoints*(spaceDim()*_scale*_scale + _centroid*_centroid);
     _centroid *= _npoints;
     for (; begin != end; ++begin)
@@ -317,7 +317,7 @@ Normalize<S, D>::insert(ITER_ begin, ITER_ end)
 
     if (_scale < 0)
 	throw std::invalid_argument("Normalize::insert(): negative square scale!!");
-	
+
     _scale = sqrt(_scale/spaceDim());
 }
 
@@ -325,7 +325,7 @@ Normalize<S, D>::insert(ITER_ begin, ITER_ end)
 /*!
   \return	変換行列:
 		\f$
-		\TUvec{T}{} = 
+		\TUvec{T}{} =
 		\TUbeginarray{ccc}
 		 s^{-1} \TUvec{I}{d} & -s^{-1}\TUvec{c}{} \\ \TUtvec{0}{d} & 1
 		\TUendarray
@@ -349,7 +349,7 @@ Normalize<S, D>::T() const -> matrix_type
 /*!
   \return	変換の転置行列:
 		\f$
-		\TUtvec{T}{} = 
+		\TUtvec{T}{} =
 		\TUbeginarray{ccc}
 		 s^{-1} \TUvec{I}{d} & \TUvec{0}{d} \\ -s^{-1}\TUtvec{c}{} & 1
 		\TUendarray
@@ -373,7 +373,7 @@ Normalize<S, D>::Tt() const -> matrix_type
 /*!
   \return	変換の逆行列:
 		\f$
-		\TUinv{T}{} = 
+		\TUinv{T}{} =
 		\TUbeginarray{ccc}
 		 s \TUvec{I}{d} & \TUvec{c}{} \\ \TUtvec{0}{d} & 1
 		\TUendarray
@@ -397,7 +397,7 @@ Normalize<S, D>::Tinv() const -> matrix_type
 /*!
   \return	変換の逆行列の転置:
 		\f$
-		\TUtinv{T}{} = 
+		\TUtinv{T}{} =
 		\TUbeginarray{ccc}
 		 s \TUvec{I}{d} & \TUvec{0}{d} \\ \TUtvec{c}{} & 1
 		\TUendarray
@@ -432,7 +432,7 @@ class HyperPlane : public std::conditional_t<D==0, Array<T>, Array<T, D+1> >
   public:
     using base_type	= std::conditional_t<D==0, Array<T>, Array<T, D+1> >;
     using		typename base_type::element_type;
-    
+
   public:
   //! 空間の次元を指定して超平面オブジェクトを生成する．
   /*!
@@ -440,7 +440,7 @@ class HyperPlane : public std::conditional_t<D==0, Array<T>, Array<T, D+1> >
     \param d	この超平面が存在する射影空間の次元
   */
     explicit	HyperPlane(size_t d=D)	:base_type(d+1)	{ (*this)[d] = 1; }
-    
+
   //! 与えられた点列の非同次座標に当てはめられた超平面オブジェクトを生成する．
   /*!
     \param begin			点列の先頭を示す反復子
@@ -471,7 +471,7 @@ class HyperPlane : public std::conditional_t<D==0, Array<T>, Array<T, D+1> >
     void		fit(ITER_ begin, ITER_ end)			;
 
   //! この超平面が存在する射影空間の次元を返す．
-  /*! 
+  /*!
     \return	射影空間の次元(同次座標のベクトルとしての次元は spaceDim()+1)
   */
     size_t		spaceDim()		const	{return size()-1;}
@@ -592,7 +592,7 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
     constexpr static size_t	DI1	= (DI == 0	? 0 : DI + 1);
     constexpr static size_t	NPARAMS = DO1*DI1;
     constexpr static size_t	DOF	= (NPARAMS == 0 ? 0 : NPARAMS - 1);
-    
+
     using base_type		= std::conditional_t<(DO==0 || DI==0),
 						     Array2<T>,
 						     Array2<T, DO+1, DI+1> >;
@@ -608,10 +608,10 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
     Projectivity(size_t outDim=DO, size_t inDim=DI)			;
     template <class ITER_>
     Projectivity(ITER_ begin, ITER_ end, bool refine=false)		;
-    
+
     template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
     Projectivity(const E_& expr)	:base_type(expr)		{}
-    
+
   //! 変換行列を指定する．
   /*!
     \param expr	(m+1)x(n+1)行列(m, nは入力／出力空間の次元)
@@ -626,18 +626,18 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
 
     using		base_type::nrow;
     using		base_type::ncol;
-    
+
     template <class ITER_>
     void		fit(ITER_ begin, ITER_ end, bool refine=false)	;
 
   //! この射影変換の入力空間の次元を返す．
-  /*! 
+  /*!
     \return	入力空間の次元(同次座標のベクトルとしての次元は inDim()+1)
   */
     size_t		inDim()			const	{return ncol()-1;}
 
   //! この射影変換の出力空間の次元を返す．
-  /*! 
+  /*!
     \return	出力空間の次元(同次座標のベクトルとしての次元は outDim()+1)
   */
     size_t		outDim()		const	{return nrow()-1;}
@@ -668,7 +668,7 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
 			{
 			    constexpr element_type	_0 = 0;
 			    constexpr element_type	_1 = 1;
-			    
+
 			    return {{ u,  v, _1, _0, _0, _0, -u*u, -u*v},
 				    {_0, _0, _0,  u,  v, _1, -u*v, -v*v}};
 			}
@@ -678,7 +678,7 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
 			compose(const Array<element_type, DOF>& dt)	;
     template <class ITER_>
     element_type	rmsError(ITER_ begin, ITER_ end)	 const	;
-    
+
   protected:
   //! 射影変換行列の最尤推定のためのコスト関数
     template <class MAP_, class ITER_>
@@ -688,7 +688,7 @@ class Projectivity : public std::conditional_t<(DO==0 || DI==0),
 	using element_type	= typename MAP_::element_type;
 	using vector_type	= Array<element_type>;
 	using matrix_type	= Array2<element_type>;
-	
+
       public:
 	Cost(ITER_ begin, ITER_ end)					;
 
@@ -717,7 +717,7 @@ Projectivity<T, DO, DI>::Projectivity(size_t outDim, size_t inDim)
 	(*this)[i][i] = 1;
     (*this)[outDim][inDim] = 1;
 }
-    
+
 //! 与えられた点対列の非同次座標から射影変換オブジェクトを生成する．
 /*!
   \param begin			点対列の先頭を示す反復子
@@ -810,7 +810,7 @@ Projectivity<T, DO, DI>::inverse() const
 {
     return TU::inverse(*this);
 }
-    
+
 //! この射影変換のパラメータ数を返す．
 /*!
   射影変換行列の要素数であり，変換の自由度数とは異なる．
@@ -834,7 +834,7 @@ Projectivity<T, DO, DI>::ndataMin() const
     return inDim() + 1
 	 + size_t(std::ceil(element_type(inDim()) / element_type(outDim())));
 }
-    
+
 //! 与えられた点に射影変換を適用してその非同次座標を返す．
 /*!
   \param x	点の非同次座標(inDim()次元)または同次座標(inDim()+1 次元)
@@ -889,7 +889,7 @@ Projectivity<T, DO, DI>::square_distance(const std::pair<IN, OUT>& pair) const
 {
     return TU::square_distance((*this)(pair.first), pair.second);
 }
-    
+
 //! 入力点に射影変換を適用した点と出力点の距離を返す．
 /*!
   \param pair	入力点の非同次座標(inDim() 次元)と出力点の非同次座標
@@ -921,7 +921,7 @@ Projectivity<T, DO, DI>::jacobian(const Array<T_, D_>& x) const -> jacobian_type
 
     return J;
 }
-    
+
 //! 与えられた点における1階微分行列を返す．
 /*!
   変換された点の射影変換行列成分に関する1階微分を計算する．
@@ -948,7 +948,7 @@ Projectivity<T, DO, DI>::derivative(const Array<T_, D_>& x) const
 
     return J;
 }
-    
+
 //! 射影変換行列を与えられた量だけ修正する．
 /*!
   \param dt	修正量を表すベクトル((outDim()+1) x (inDim()+1) 次元)
@@ -969,11 +969,11 @@ Projectivity<T, DO, DI>::compose(const Array<element_type, DOF>& dt)
     auto	t0 = (*this)[0][0];
     auto	t1 = (*this)[0][1];
     auto	t2 = (*this)[0][2];
-    
+
     (*this)[0][0] -= (t0*dt[0] + t1*dt[3] + t2*dt[6]);
     (*this)[0][1] -= (t0*dt[1] + t1*dt[4] + t2*dt[7]);
     (*this)[0][2] -= (t0*dt[2] + t1*dt[5]);
-    
+
     t0 = (*this)[1][0];
     t1 = (*this)[1][1];
     t2 = (*this)[1][2];
@@ -1014,7 +1014,7 @@ Projectivity<T, DO, DI>::Cost<MAP_, ITER_>::Cost(ITER_ begin, ITER_ end)
     :_begin(begin), _end(end), _npoints(std::distance(_begin, _end))
 {
 }
-    
+
 template <class T, size_t DO, size_t DI> template <class MAP_, class ITER_> auto
 Projectivity<T, DO, DI>::Cost<MAP_, ITER_>::operator ()(const MAP_& map) const
     -> vector_type
@@ -1027,10 +1027,10 @@ Projectivity<T, DO, DI>::Cost<MAP_, ITER_>::operator ()(const MAP_& map) const
 	val(n, outDim) = map(iter->first) - iter->second;
 	n += outDim;
     }
-    
+
     return val;
 }
-    
+
 template <class T, size_t DO, size_t DI> template <class MAP_, class ITER_> auto
 Projectivity<T, DO, DI>::Cost<MAP_, ITER_>::derivative(const MAP_& map) const
     -> matrix_type
@@ -1087,7 +1087,7 @@ class Affinity : public Projectivity<T, DO, DI>
     using derivative_type	= Array2<element_type, DO, NPARAMS>;
     using derivative0_type	= Array2<element_type, DO, DOF>;
 
-    
+
   //! 入力空間と出力空間の次元を指定してアフィン変換オブジェクトを生成する．
   /*!
     恒等変換として初期化される．
@@ -1121,7 +1121,7 @@ class Affinity : public Projectivity<T, DO, DI>
 			    (*this)[outDim()] = 0;
 			    (*this)[outDim()][inDim()] = 1;
 			}
-    
+
   //! 変換行列を指定する．
   /*!
     変換行列の下端行は強制的に 0,0,...,0,1 に設定される．
@@ -1136,11 +1136,11 @@ class Affinity : public Projectivity<T, DO, DI>
 			    (*this)[outDim()][inDim()] = 1;
 			    return *this;
 			}
-    
+
     using		base_type::inDim;
     using		base_type::outDim;
     using		base_type::operator ();
-    
+
     template <class ITER_>
     void		fit(ITER_ begin, ITER_ end)			;
     size_t		nparams()				const	;
@@ -1158,7 +1158,7 @@ class Affinity : public Projectivity<T, DO, DI>
 			{
 			    constexpr element_type	_0 = 0;
 			    constexpr element_type	_1 = 1;
-			    
+
 			    return {{ u,  v, _1, _0, _0, _0},
 				    {_0, _0, _0,  u,  v, _1}};
 			}
@@ -1166,9 +1166,9 @@ class Affinity : public Projectivity<T, DO, DI>
     template <size_t DO_=DO, size_t DI_=DI>
     std::enable_if_t<DO_ == 2 && DI_ == 2>
 			compose(const Array<element_type, DOF>& dt)	;
-    
+
   //! このアフィン変換の変形部分を表現する行列を返す．
-  /*! 
+  /*!
     \return	outDim() x inDim() 行列
   */
     auto	A()	const	{return slice(*this, 0, outDim(), 0, inDim());}
@@ -1187,7 +1187,7 @@ Affinity<T, DO, DI>::fit(ITER_ begin, ITER_ end)
   // 入力点列の正規化
     const Normalize<element_type, DI>	normalize(make_first_iterator(begin),
 						  make_first_iterator(end));
-    
+
   // 充分な個数の点対があるか？
     const size_t			ndata = std::distance(begin, end);
     if (ndata == 0)		// beginが有効か？
@@ -1218,7 +1218,7 @@ Affinity<T, DO, DI>::fit(ITER_ begin, ITER_ end)
 }
 
 //! このアフィン変換の並行移動部分を表現するベクトルを返す．
-/*! 
+/*!
   \return	outDim() 次元ベクトル
 */
 template <class T, size_t DO, size_t DI> auto
@@ -1262,7 +1262,7 @@ Affinity<T, DO, DI>::inverse() const
 {
     return TU::inverse(*this);
 }
-    
+
 template <class T, size_t DO, size_t DI> template <size_t DO_, size_t DI_>
 inline std::enable_if_t<DO_ == 2 && DI_ == 2,
 			typename Affinity<T, DO, DI>::point_type>
@@ -1314,14 +1314,14 @@ Affinity<T, DO, DI>::compose(const Array<element_type, DOF>& dt)
     (*this)[0][0] -= (t0*dt[0] + t1*dt[3]);
     (*this)[0][1] -= (t0*dt[1] + t1*dt[4]);
     (*this)[0][2] -= (t0*dt[2] + t1*dt[5]);
-    
+
     t0 = (*this)[1][0];
     t1 = (*this)[1][1];
     (*this)[1][0] -= (t0*dt[0] + t1*dt[3]);
     (*this)[1][1] -= (t0*dt[1] + t1*dt[4]);
     (*this)[1][2] -= (t0*dt[2] + t1*dt[5]);
 }
-    
+
 template <class T> using Affinity11	= Affinity<T, 1, 1>;
 template <class T> using Affinity12	= Affinity<T, 1, 2>;
 template <class T> using Affinity22	= Affinity<T, 2, 2>;
@@ -1347,7 +1347,7 @@ class Similarity : public Affinity<T, D, D>
 
     constexpr static size_t	NPARAMS = D*(D+1)/2 + 1;
     constexpr static size_t	DOF	= NPARAMS;
-    
+
     using			typename base_type::element_type;
     using derivative_type	= Array2<element_type, D, NPARAMS>;
     using derivative0_type	= Array2<element_type, D, DOF>;
@@ -1399,28 +1399,28 @@ class Similarity : public Affinity<T, D, D>
     using		base_type::operator ();
 
   //! この相似変換の入力/出力空間の次元を返す．
-  /*! 
+  /*!
     \return	入力/出力空間の次元(同次座標のベクトルとしての次元は dim()+1)
   */
     size_t		dim()		const	{ return inDim(); };
-    
+
     auto		s()		const	;
     auto		R()		const	;
 
   //! この相似変換の回転部分を表現する回転行列を返す．
-  /*! 
+  /*!
     \return	dim() x dim() 行列
   */
     auto		sR()		const	{ return base_type::A(); }
 
   //! この相似変換の並行移動部分を表現するベクトルを返す．
-  /*! 
+  /*!
     \return	dim() 次元ベクトル
   */
     auto		t()		const	{ return base_type::b(); }
 
     template <class ITER_>
-    void		fit(ITER_ begin, ITER_ end)			;
+    element_type	fit(ITER_ begin, ITER_ end)			;
     Similarity		inverse()				const	;
     size_t		nparams()				const	;
     size_t		ndataMin()				const	;
@@ -1442,7 +1442,7 @@ class Similarity : public Affinity<T, D, D>
 };
 
 //! この相似変換のスケーリング係数を返す．
-/*! 
+/*!
   \return	スケーリング係数
 */
 template<class T, size_t D> inline auto
@@ -1452,7 +1452,7 @@ Similarity<T, D>::s() const
 }
 
 //! この相似変換の回転部分を表現する回転行列を返す．
-/*! 
+/*!
   \return	dim() x dim() 行列
 */
 template<class T, size_t D> inline auto
@@ -1464,14 +1464,15 @@ Similarity<T, D>::R() const
     return RR;
 }
 
-    
+
 //! 与えられた点対列の非同次座標から相似変換を計算する．
 /*!
   \param begin			点対列の先頭を示す反復子
   \param end			点対列の末尾を示す反復子
   \throw std::invalid_argument	点対の数が ndataMin() に満たない場合に送出
 */
-template<class T, size_t D> template <class ITER_> void
+template<class T, size_t D> template <class ITER_>
+typename Similarity<T, D>::element_type
 Similarity<T, D>::fit(ITER_ begin, ITER_ end)
 {
   // 充分な個数の点対があるか？
@@ -1493,33 +1494,41 @@ Similarity<T, D>::fit(ITER_ begin, ITER_ end)
     }
     xc /= ndata;
     yc /= ndata;
-    
+
   // モーメント行列の計算
+    element_type		sqr_dx = 0;
+    element_type		sqr_dy = 0;
     Matrix<element_type, D, D>	M(d, d);
     for (auto corres = begin; corres != end; ++corres)
-	M += (corres->first - xc) % (corres->second - yc);
+    {
+	const auto	dx = corres->first  - xc;
+	const auto	dy = corres->second - yc;
+
+	sqr_dx += square(dx);
+	sqr_dy += square(dy);
+	M      += dx % dy;
+    }
 
   // モーメント行列の特異値がすべて正であることを確認
     SVDecomposition<element_type>	svd(M);
     for (auto sigma : svd.diagonal())
 	if (sigma <= 0)
 	    throw std::runtime_error("Similarity::fit(): non-positive singula value!!");
-    
+
   // スケールの計算
-    element_type	sqr_x = 0;
-    for (auto corres = begin; corres != end; ++corres)
-	sqr_x += square(corres->first - xc);
     element_type	scale = 0;
     for (auto sigma : svd.diagonal())
 	scale += sigma;
-    scale /= sqr_x;
-    
+    scale /= sqr_dx;
+
   // 点群間の相似変換の計算
     base_type::resize(d + 1, d + 1);
     slice(*this, 0, d, 0, d) = scale * transpose(svd.Ut()) * svd.Vt();
     for (size_t i = 0; i < d; ++i)
 	(*this)[i][d] = yc[i] - slice((*this)[i], 0, d) * xc;
     (*this)[d][d] = 1;
+
+    return std::sqrt(std::abs(sqr_dy - square(scale)*sqr_dx)/ndata);
 }
 
 //! この相似変換の逆変換を返す．
@@ -1542,7 +1551,7 @@ Similarity<T, D>::inverse() const
 
     return Tinv;
 }
-    
+
 //! この相似変換の独立なパラメータ数を返す．
 /*!
   相似変換の独立なパラメータ数すなわち変換の自由度数に一致する．
@@ -1579,9 +1588,9 @@ Similarity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
 	xx = x;
     else
 	xx = inhomogeneous(x);
-    
+
     derivative_type	J(dim(), nparams());
-    
+
     switch (dim())
     {
       case 2:
@@ -1606,7 +1615,7 @@ Similarity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
 
     return J;
 }
-    
+
 //! 相似変換行列を与えられた量だけ修正する．
 /*!
   \param dt	修正量を表すベクトル(dim() x (dim()+1)/2 次元)
@@ -1615,7 +1624,7 @@ template <class T, size_t D> void
 Similarity<T, D>::update(const Array<element_type, NPARAMS>& dt)
 {
     const auto	scale = s();
-    
+
     switch (dim())
     {
       case 2:
@@ -1644,20 +1653,20 @@ Similarity<T, D>::compose(const Array<element_type, DOF>& dt)
 {
     const auto	Rt = rotation(dt[2]);
     const auto	k  = (1 - dt[3]/s());
-    
+
     auto	r0 = (*this)[0][0];
     auto	r1 = (*this)[0][1];
     (*this)[0][0]  = k * (r0*Rt[0][0] + r1*Rt[1][0]);
     (*this)[0][1]  = k * (r0*Rt[0][1] + r1*Rt[1][1]);
     (*this)[0][2] -= ((*this)[0][0]*dt[0] + (*this)[0][1]*dt[1]);
-    
+
     r0 = (*this)[1][0];
     r1 = (*this)[1][1];
     (*this)[1][0]  = k * (r0*Rt[0][0] + r1*Rt[1][0]);
     (*this)[1][1]  = k * (r0*Rt[0][1] + r1*Rt[1][1]);
     (*this)[1][2] -= ((*this)[1][0]*dt[0] + (*this)[1][1]*dt[1]);
 }
-    
+
 template <class T> using Similarity2	= Similarity<T, 2>;
 template <class T> using Similarity3	= Similarity<T, 3>;
 
@@ -1680,7 +1689,7 @@ class Rigidity : public Affinity<T, D, D>
 
     constexpr static size_t	NPARAMS = D*(D+1)/2;
     constexpr static size_t	DOF	= NPARAMS;
-    
+
     using			typename base_type::element_type;
     using derivative_type	= Array2<element_type, D, NPARAMS>;
     using derivative0_type	= Array2<element_type, D, DOF>;
@@ -1731,25 +1740,25 @@ class Rigidity : public Affinity<T, D, D>
     using		base_type::outDim;
 
   //! この剛体変換の入力/出力空間の次元を返す．
-  /*! 
+  /*!
     \return	入力/出力空間の次元(同次座標のベクトルとしての次元は dim()+1)
   */
     size_t		dim()		const	{ return inDim(); };
-    
+
   //! この剛体変換の回転部分を表現する回転行列を返す．
-  /*! 
+  /*!
     \return	dim() x dim() 行列
   */
     auto		R()		const	{ return base_type::A(); }
 
   //! この剛体変換の並行移動部分を表現するベクトルを返す．
-  /*! 
+  /*!
     \return	dim() 次元ベクトル
   */
     auto		t()		const	{ return base_type::b(); }
 
     template <class ITER_>
-    void		fit(ITER_ begin, ITER_ end)			;
+    element_type	fit(ITER_ begin, ITER_ end)			;
     Rigidity		inverse()				const	;
     size_t		nparams()				const	;
     size_t		ndataMin()				const	;
@@ -1776,7 +1785,8 @@ class Rigidity : public Affinity<T, D, D>
   \param end			点対列の末尾を示す反復子
   \throw std::invalid_argument	点対の数が ndataMin() に満たない場合に送出
 */
-template<class T, size_t D> template <class ITER_> void
+template<class T, size_t D> template <class ITER_>
+typename Rigidity<T, D>::element_type
 Rigidity<T, D>::fit(ITER_ begin, ITER_ end)
 {
   // 充分な個数の点対があるか？
@@ -1798,24 +1808,36 @@ Rigidity<T, D>::fit(ITER_ begin, ITER_ end)
     }
     xc /= ndata;
     yc /= ndata;
-    
+
   // モーメント行列の計算
+    element_type	sqr_d = 0;
     Matrix<element_type, D, D>	M(d, d);
     for (auto corres = begin; corres != end; ++corres)
-	M += (corres->first - xc) % (corres->second - yc);
+    {
+	const auto	dx = corres->first - xc;
+	const auto	dy = corres->second - yc;
+
+	sqr_d += (square(dx) + square(dy));
+	M     += dx % dy;
+    }
 
   // モーメント行列の特異値がすべて正であることを確認
     SVDecomposition<element_type>	svd(M);
     for (auto sigma : svd.diagonal())
+    {
 	if (sigma <= 0)
 	    throw std::runtime_error("Similarity::fit(): non-positive singula value!!");
-    
+	sqr_d -= 2*sigma;
+    }
+
   // 点群間の剛体変換の計算
     base_type::resize(d + 1, d + 1);
     (*this)(0, d, 0, d) = transpose(svd.Ut()) * svd.Vt();
     for (size_t i = 0; i < d; ++i)
 	(*this)[i][d] = yc[i] - slice((*this)[i], 0, d) * xc;
     (*this)[d][d] = 1;
+
+    return std::sqrt(std::abs(sqr_d)/ndata);
 }
 
 //! この剛体変換の逆変換を返す．
@@ -1837,7 +1859,7 @@ Rigidity<T, D>::inverse() const
 
     return Tinv;
 }
-    
+
 //! この剛体変換の独立なパラメータ数を返す．
 /*!
   剛体変換の独立なパラメータ数すなわち変換の自由度数に一致する．
@@ -1874,9 +1896,9 @@ Rigidity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
 	xx = x;
     else
 	xx = inhomogeneous(x);
-    
+
     derivative_type	J(dim(), nparams());
-    
+
     switch (dim())
     {
       case 2:
@@ -1894,7 +1916,7 @@ Rigidity<T, D>::derivative(const Array<T_, D_>& x) const -> derivative_type
 
     return J;
 }
-    
+
 //! 剛体変換行列を与えられた量だけ修正する．
 /*!
   \param dt	修正量を表すベクトル(dim() x (dim()+1)/2 次元)
@@ -1927,20 +1949,20 @@ inline std::enable_if_t<D_ == 2>
 Rigidity<T, D>::compose(const Array<element_type, DOF>& dt)
 {
     const auto	Rt = rotation(dt[2]);
-    
+
     auto	r0 = (*this)[0][0];
     auto	r1 = (*this)[0][1];
     (*this)[0][0]  = r0*Rt[0][0] + r1*Rt[1][0];
     (*this)[0][1]  = r0*Rt[0][1] + r1*Rt[1][1];
     (*this)[0][2] -= ((*this)[0][0]*dt[0] + (*this)[0][1]*dt[1]);
-    
+
     r0 = (*this)[1][0];
     r1 = (*this)[1][1];
     (*this)[1][0]  = r0*Rt[0][0] + r1*Rt[1][0];
     (*this)[1][1]  = r0*Rt[0][1] + r1*Rt[1][1];
     (*this)[1][2] -= ((*this)[1][0]*dt[0] + (*this)[1][1]*dt[1]);
 }
-    
+
 template <class T> using Rigidity2	= Rigidity<T, 2>;
 template <class T> using Rigidity3	= Rigidity<T, 3>;
 
@@ -2033,7 +2055,7 @@ class BoundingBox
     BoundingBox&	operator *=(S c)			;
     BoundingBox&	operator |=(const BoundingBox& bbox)	;
     BoundingBox&	operator &=(const BoundingBox& bbox)	;
-    
+
   private:
   //! 入力ストリームからbounding boxを成す2つの点の座標を入力する(ASCII)．
   /*!
@@ -2046,7 +2068,7 @@ class BoundingBox
     {
 	return in >> bbox._min >> bbox._max;
     }
-    
+
     point_type	_min;
     point_type	_max;
 };
@@ -2105,7 +2127,7 @@ template <class P> BoundingBox<P>&
 BoundingBox<P>::clear()
 {
     using Limits = std::numeric_limits<element_type>;
-    
+
     for (size_t i = 0; i < dim(); ++i)
     {
 	_min[i] = Limits::max();
@@ -2143,7 +2165,7 @@ BoundingBox<P>::operator +=(const Array<T_, D_>& dt)
     _max += dt;
     return *this;
 }
-    
+
 //! bounding boxを与えられた変位だけ負方向に平行移動する．
 /*!
   \param dt	変位
@@ -2157,7 +2179,7 @@ BoundingBox<P>::operator -=(const Array<T_, D_>& dt)
     _max -= dt;
     return *this;
 }
-    
+
 //! bounding boxを与えられたスケールだけ拡大／縮小する．
 /*!
   負のスケールを与えるとbounding boxが反転する．
@@ -2184,7 +2206,7 @@ BoundingBox<P>::operator |=(const BoundingBox<P>& bbox)
 {
     return expand(bbox.min()).expand(bbox.max());
 }
-    
+
 //! このbounding boxと指定されたbounding boxとの交わりをとる．
 /*!
   与えられたbounding boxとの間に共通部分がなければ空のbounding boxとなる．
@@ -2201,7 +2223,7 @@ BoundingBox<P>::operator &=(const BoundingBox<P>& bbox)
     }
     return *this;
 }
-    
+
 //! 2つのbounding boxの結びをとる．
 /*!
   \param a	bounding box
@@ -2214,7 +2236,7 @@ operator |(const BoundingBox<P>& a, const BoundingBox<P>& b)
     BoundingBox<P>	c(a);
     return c |= b;
 }
-    
+
 //! 2つのbounding boxの交わりをとる．
 /*!
   与えられたbounding boxに共通部分がなければ空のbounding boxを返す．
@@ -2250,6 +2272,6 @@ operator <<(std::ostream& out, const BoundingBox<P>& bbox)
     return out << bbox.min() << bbox.max() << std::endl;
 #endif
 }
-    
+
 }
 #endif	// !TU_GEOMETRYPP_H
