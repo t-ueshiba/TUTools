@@ -13,7 +13,7 @@ IDLS		=
 MOCHDRS		=
 
 INCDIRS		= -I../../..
-CPPFLAGS	= -DNDEBUG #-DSCORE_ARRAY3 #-DTU_DEBUG #-DUSE_TBB
+CPPFLAGS	= -DNDEBUG -DSCORE_ARRAY3 #-DTU_DEBUG #-DUSE_TBB
 CFLAGS		= -g -O3
 NVCCFLAGS	= -g
 SANITIZE	= -fsanitize=address -fsanitize-address-use-after-scope

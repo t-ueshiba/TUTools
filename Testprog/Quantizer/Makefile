@@ -1,5 +1,5 @@
-SUBDIR	= Flt		\
-	  RGB
+SUBDIR	= quantizeFlt		\
+	  quantizeRGB
 
 TARGETS	= all clean depend
 
