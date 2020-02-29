@@ -517,6 +517,8 @@ class range<ITER, 0>
     auto	end()	  const	{ return const_iterator(_begin + _size); }
     auto	cbegin()  const	{ return begin(); }
     auto	cend()	  const	{ return end(); }
+    auto	rbegin()  	{ return std::make_reverse_iterator(end()); }
+    auto	rend()	  	{ return std::make_reverse_iterator(begin()); }
     auto	rbegin()  const	{ return std::make_reverse_iterator(end()); }
     auto	rend()	  const	{ return std::make_reverse_iterator(begin()); }
     auto	crbegin() const	{ return rbegin(); }
