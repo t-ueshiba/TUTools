@@ -43,9 +43,10 @@ class ExpDiff
     using result_type	= T;	//!< 結果の型
 
   public:
-		ExpDiff(T sigma=1) :_nsigma(-sigma)	{}
+		ExpDiff(T sigma=1) :_sigma(sigma)	{}
 
-    void	setSigma(result_type sigma)		{ _nsigma = -sigma; }
+    void	setSigma(result_type sigma)		{ _sigma = sigma; }
+    T		sigma()					{ return _sigma; }
     T		operator ()(S x, S y) const
 		{
 		    return f(x, y, typename std::is_arithmetic<S>::type());
@@ -54,17 +55,17 @@ class ExpDiff
   private:
     T		f(S x, S y, std::true_type) const
 		{
-		    return std::exp(diff(x, y) / _nsigma);
+		    return std::exp(-diff(x, y) / _sigma);
 		}
     T		f(S x, S y, std::false_type) const
 		{
 		    Vector<T, 3>	a{T(x.r) - T(y.r),
 					  T(x.g) - T(y.g), T(x.b) - T(y.b)};
-		    return std::exp(length(a) / _nsigma);
+		    return std::exp(-length(a) / _sigma);
 		}
 
   private:
-    T		_nsigma;
+    T		_sigma;
 };
     
 namespace detail

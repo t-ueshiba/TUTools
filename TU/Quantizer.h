@@ -312,7 +312,7 @@ Quantizer<T>::operator ()(ITER ib, ITER ie, size_t nbins)
     for (auto idx = _indices.begin(); ib != ie; ++ib, ++idx)
 	io.push_back(pair_type(ib, idx));
 
-    super::quantize(io, nbins, std::is_floating_point<T>());
+    super::quantize(io, nbins, std::is_arithmetic<T>());
 
     return _indices;
 }
@@ -367,7 +367,7 @@ Quantizer2<T>::operator ()(ROW ib, ROW ie, size_t nbins)
 	    io.push_back(pair_type(col, idx));
     }
 
-    super::quantize(io, nbins, std::is_floating_point<T>());
+    super::quantize(io, nbins, std::is_arithmetic<T>());
 
     return _indices;
 }
