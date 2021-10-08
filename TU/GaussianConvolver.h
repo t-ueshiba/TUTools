@@ -71,11 +71,13 @@ template <class T> class GaussianCoefficients
     
   public:
     void	initialize(coeff_type sigma)		;
-    
+    coeff_type	sigma()				const	{return _sigma;}
+	
   protected:
     GaussianCoefficients(coeff_type sigma)		{initialize(sigma);}
     
   protected:
+    coeff_type	_sigma;
     coeff_type	_c0[8];		//!< forward coefficients for smoothing
     coeff_type	_c1[8];		//!< forward coefficients for 1st derivatives
     coeff_type	_c2[8];		//!< forward coefficients for 2nd derivatives
@@ -99,7 +101,7 @@ template <class T> class GaussianConvolver
     GaussianConvolver(coeff_type sigma=1.0)	:coeffs(sigma)		{}
 
     GaussianConvolver&	initialize(coeff_type sigma)			;
-
+    
     template <class IN, class OUT> void	smooth(IN ib, IN ie, OUT out)	;
     template <class IN, class OUT> void	diff  (IN ib, IN ie, OUT out)	;
     template <class IN, class OUT> void	diff2 (IN ib, IN ie, OUT out)	;

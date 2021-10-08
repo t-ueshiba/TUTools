@@ -171,26 +171,28 @@ GaussianCoefficients<T>::CostFunction::update(argument_type& params,
 template <class T> void
 GaussianCoefficients<T>::initialize(T sigma)
 {
-    coefficients4( 1.80579,   7.42555, 0.676413/sigma, 2.10032/sigma,
-		  -0.805838, -1.50785, 1.90174 /sigma, 2.15811/sigma, _c0);
+    _sigma = sigma;
     
-    coefficients4(-0.628422, -4.68837,  0.666686/sigma, 1.54201/sigma,
-		   0.628422,  0.980129, 2.08425 /sigma, 1.52152/sigma, _c1);
+    coefficients4( 1.80579,   7.42555, 0.676413/_sigma, 2.10032/_sigma,
+		  -0.805838, -1.50785, 1.90174 /_sigma, 2.15811/_sigma, _c0);
+    
+    coefficients4(-0.628422, -4.68837,  0.666686/_sigma, 1.54201/_sigma,
+		   0.628422,  0.980129, 2.08425 /_sigma, 1.52152/_sigma, _c1);
 
-  /*    coefficients4(-1.27844,   3.24717, 0.752205/sigma, 1.18524/sigma,
-	0.278487, -1.54294, 2.21984/sigma,  1.27214/sigma, _c2);*/
+  /*    coefficients4(-1.27844,   3.24717, 0.752205/_sigma, 1.18524/_sigma,
+	0.278487, -1.54294, 2.21984/_sigma,  1.27214/_sigma, _c2);*/
     typename CostFunction::argument_type	params(CostFunction::D);
     params[0].set(-1.3, 3.6, 0.75, 1.2);
     params[1].set(0.32, -1.7, 2.2, 1.3);
     CostFunction	err(100, 5.0);
-    if (sigma < 0.55)
-	throw std::runtime_error("GaussianCoefficients::initialize(): sigma must be greater than 0.55");
-    EvenConstraint	g(sigma);
+    if (_sigma < 0.55)
+	throw std::runtime_error("GaussianCoefficients::initialize(): _sigma must be greater than 0.55");
+    EvenConstraint	g(_sigma);
     minimizeSquare(err, g, params, 1000, 1.0e-6);
     coefficients4(params[0].a, params[0].b,
-		  params[0].theta/sigma, params[0].alpha/sigma,
+		  params[0].theta/_sigma, params[0].alpha/_sigma,
 		  params[1].a, params[1].b,
-		  params[1].theta/sigma, params[1].alpha/sigma, _c2);
+		  params[1].theta/_sigma, params[1].alpha/_sigma, _c2);
 }
 
 template class GaussianCoefficients<float>;
