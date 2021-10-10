@@ -69,7 +69,7 @@ class Profiler
 			    _accums[_active] += (t1 - _t0);
 			    _active = -1;		// タイマを停止
 			}
-			if (0 <= n && n < _accums.size())
+			if (0 <= n && size_t(n) < _accums.size())
 			{
 			    _t0 = clock::now();	// 起動時刻を記録
 			    _active = n;	// タイマを起動
