@@ -107,10 +107,11 @@ struct RGB
 
     constexpr static size_t	size = 3;
     
-    RGB(element_type rr, element_type gg, element_type bb)
-	:r(rr), g(gg), b(bb)						{}
+    RGB(element_type rr, element_type gg, element_type bb,
+	element_type aa=255)	:r(rr), g(gg), b(bb)			{}
     
-    element_type r, g, b;
+    element_type			r, g, b;
+    constexpr static element_type	a = 255;
 };
 
 struct BGR
@@ -119,10 +120,11 @@ struct BGR
 
     constexpr static size_t	size = 3;
     
-    BGR(element_type rr, element_type gg, element_type bb)
-	:b(bb), g(gg), r(rr)						{}
+    BGR(element_type rr, element_type gg, element_type bb,
+	element_type aa=255)	:b(bb), g(gg), r(rr)			{}
     
-    element_type b, g, r;
+    element_type			b, g, r;
+    constexpr static element_type	a = 255;
 };
 
 struct RGBA
@@ -187,12 +189,8 @@ struct RGB_ : public E, boost::additive<RGB_<E>,
     using	typename E::element_type;
     
     RGB_()				:E(0, 0, 0)			{}
-    RGB_(element_type rr, element_type gg, element_type bb)
-					:E(rr, gg, bb)			{}
     RGB_(element_type rr, element_type gg, element_type bb,
-	 element_type aa)		:E(rr, gg, bb, aa)		{}
-    RGB_(const RGB_<detail::RGB>& p)	:E(p.r, p.g, p.b)		{}
-    RGB_(const RGB_<detail::BGR>& p)	:E(p.r, p.g, p.b)		{}
+	 element_type aa=255)		:E(rr, gg, bb, aa)		{}
     template <class E_>
     RGB_(const RGB_<E_>& p)		:E(p.r, p.g, p.b, p.a)		{}
     template <class T_,
@@ -205,6 +203,7 @@ struct RGB_ : public E, boost::additive<RGB_<E>,
     using	E::r;
     using	E::g;
     using	E::b;
+    using	E::a;
 
     template <class T_,
 	      std::enable_if_t<std::is_arithmetic<T_>::value>* = nullptr>
@@ -234,7 +233,7 @@ struct RGB_ : public E, boost::additive<RGB_<E>,
 		}
     bool	operator ==(const RGB_& p) const
 		{
-		    return (r == p.r && g == p.g && b == p.b && E::a == p.a);
+		    return (r == p.r && g == p.g && b == p.b && a == p.a);
 		}
 };
 
@@ -253,79 +252,16 @@ operator >>(std::istream& in, RGB_<E>& p)
 template <class E> inline std::ostream&
 operator <<(std::ostream& out, const RGB_<E>& p)
 {
-    return out << u_int(p.r) << ' ' << u_int(p.g) << ' ' << u_int(p.b) << ' '
-	       << u_int(p.a);
+    return out << u_int(p.r) << ' ' << u_int(p.g) << ' ' << u_int(p.b);
 }
     
 /************************************************************************
-*  struct RGB								*
+*  type aliases RGB, BGR, RGBA, ABGR, ARGB, BGRA			*
 ************************************************************************/
 //! Red, Green, Blue（各8bit）の順で並んだカラー画素
 using RGB = RGB_<detail::RGB>;
-
-template <> template <class E1> inline
-RGB_<detail::RGB>::RGB_(const RGB_<E1>& p) :detail::RGB(p.r, p.g, p.b)	{}
-    
-template <> inline bool
-RGB_<detail::RGB>::operator ==(const RGB_& p) const
-{
-    return (r == p.r && g == p.g && b == p.b);
-}
-
-inline std::istream&
-operator >>(std::istream& in, RGB& p)
-{
-    u_int	r, g, b;
-    in >> r >> g >> b;
-    p.r = r;
-    p.g = g;
-    p.b = b;
-
-    return in;
-}
-
-inline std::ostream&
-operator <<(std::ostream& out, const RGB& p)
-{
-    return out << u_int(p.r) << ' ' << u_int(p.g) << ' ' << u_int(p.b);
-}
-
-/************************************************************************
-*  struct BGR								*
-************************************************************************/
 //! Blue, Green, Red（各8bit）の順で並んだカラー画素
 using BGR = RGB_<detail::BGR>;
-
-template <> template <class E1> inline
-RGB_<detail::BGR>::RGB_(const RGB_<E1>& p) :detail::BGR(p.r, p.g, p.b)	{}
-    
-template <> inline bool
-RGB_<detail::BGR>::operator ==(const RGB_& p) const
-{
-    return (r == p.r && g == p.g && b == p.b);
-}
-
-inline std::istream&
-operator >>(std::istream& in, BGR& p)
-{
-    u_int	r, g, b;
-    in >> r >> g >> b;
-    p.r = r;
-    p.g = g;
-    p.b = b;
-
-    return in;
-}
-
-inline std::ostream&
-operator <<(std::ostream& out, const BGR& p)
-{
-    return out << u_int(p.r) << ' ' << u_int(p.g) << ' ' << u_int(p.b);
-}
-
-/************************************************************************
-*  struct RGBA, ABGR, ARGB, BGRA					*
-************************************************************************/
 //! Red, Green, Blue, Alpha（各8bit）の順で並んだカラー画素
 using RGBA = RGB_<detail::RGBA>;
 //! Alpha, Blue, Green, Red（各8bit）の順で並んだカラー画素
