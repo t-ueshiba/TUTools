@@ -1126,9 +1126,8 @@ Mesh<V, F, M>::Edge::prev() const
 template <class V, class F, size_t M> typename Mesh<V, F, M>::Edge
 Mesh<V, F, M>::Edge::conj() const
 {
-    viterator	vn = next().viter();	// この辺の終点
     Edge	edge(_f->_f[_e]);	// この辺を介して隣接する面の最初の辺
-    while (edge.viter() != vn)		// この辺の終点を始点とする辺を探す
+    while (edge._f->_f[edge._e] != _f)	// この辺の親面を裏面とする辺を探す
 	++edge;
     return edge;
 }
@@ -1183,13 +1182,8 @@ Mesh<V, F, M>::Edge::pair(const Edge& edge) const
 template <class V, class F, size_t M> void
 Mesh<V, F, M>::Edge::replaceVertex(viterator v, const Edge& edgeE) const
 {
-  // 先に始点を書き換えてしまうと裏に移れなくなってしまうので，
-  // 再帰的に処理することによってまずedgeEの1つ手前の辺まで移動し，
-  // 戻りながら順次書き換える．
-    Edge	edgePC(prev().conj());
-    if (edgePC != edgeE)
-	edgePC.replaceVertex(v, edgeE);		// 再帰する．
-    _f->_v[_e] = v;
+    for (Edge edge = *this; edge != edgeE; ~(--edge))
+	edge.replaceVertex(v);
 }
 
 //! この辺の始点を指定された頂点に置き換える．
