@@ -1191,7 +1191,7 @@ Mesh<V, F, M>::Edge::replaceVertex(viterator v, const Edge& edgeE) const
     do
     {
     	edge.replaceVertex(v);
-    } while (~(--edge) != *this);
+    } while (~(--edge) != edgeE);
 }
 
 //! この辺の始点を指定された頂点に置き換える．
@@ -1206,4 +1206,3 @@ Mesh<V, F, M>::Edge::replaceVertex(viterator v) const
 
 }
 #endif	// !TU_MESHPP_H
-
