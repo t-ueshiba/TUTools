@@ -1094,7 +1094,14 @@ Mesh<V, F, M>::Edge::operator --()
 template <class V, class F, size_t M> inline typename Mesh<V, F, M>::Edge&
 Mesh<V, F, M>::Edge::operator ~()
 {
-    return *this = conj();
+    const fiterator	f = _f;
+    _f = _f->_f[_e];
+    for (_e = 0; _e < NSides; ++_e)
+	if (_f->_f[_e] == f)
+	    return *this;
+
+    throw std::runtime_error("TU::Mesh<V, F, M>::Face::operator ~(): Internal error!");
+    return *this;
 }
 
 //! この辺の次の辺を返す．
@@ -1126,10 +1133,8 @@ Mesh<V, F, M>::Edge::prev() const
 template <class V, class F, size_t M> typename Mesh<V, F, M>::Edge
 Mesh<V, F, M>::Edge::conj() const
 {
-    Edge	edge(_f->_f[_e]);	// この辺を介して隣接する面の最初の辺
-    while (edge._f->_f[edge._e] != _f)	// この辺の親面を裏面とする辺を探す
-	++edge;
-    return edge;
+    Edge	edge(*this);
+    return ~edge;
 }
 
 //! この辺を所有する面を指す反復子を返す．
@@ -1182,8 +1187,11 @@ Mesh<V, F, M>::Edge::pair(const Edge& edge) const
 template <class V, class F, size_t M> void
 Mesh<V, F, M>::Edge::replaceVertex(viterator v, const Edge& edgeE) const
 {
-    for (Edge edge = *this; edge != edgeE; ~(--edge))
-	edge.replaceVertex(v);
+    Edge	edge = *this;
+    do
+    {
+    	edge.replaceVertex(v);
+    } while (~(--edge) != *this);
 }
 
 //! この辺の始点を指定された頂点に置き換える．
@@ -1198,3 +1206,4 @@ Mesh<V, F, M>::Edge::replaceVertex(viterator v) const
 
 }
 #endif	// !TU_MESHPP_H
+
