@@ -107,8 +107,8 @@ struct RGB
 
     constexpr static size_t	size = 3;
     
-    RGB(element_type rr, element_type gg, element_type bb,
-	element_type aa=255)	:r(rr), g(gg), b(bb)			{}
+    constexpr	RGB(element_type rr, element_type gg, element_type bb,
+		    element_type aa=255) :r(rr), g(gg), b(bb)		{}
     
     element_type			r, g, b;
     constexpr static element_type	a = 255;
@@ -120,8 +120,8 @@ struct BGR
 
     constexpr static size_t	size = 3;
     
-    BGR(element_type rr, element_type gg, element_type bb,
-	element_type aa=255)	:b(bb), g(gg), r(rr)			{}
+    constexpr	BGR(element_type rr, element_type gg, element_type bb,
+		    element_type aa=255) :b(bb), g(gg), r(rr)		{}
     
     element_type			b, g, r;
     constexpr static element_type	a = 255;
@@ -133,8 +133,8 @@ struct RGBA
 
     constexpr static size_t	size = 4;
     
-    RGBA(element_type rr, element_type gg, element_type bb,
-	 element_type aa=255)	:r(rr), g(gg), b(bb), a(aa)		{}
+    constexpr	RGBA(element_type rr, element_type gg, element_type bb,
+		     element_type aa=255) :r(rr), g(gg), b(bb), a(aa)	{}
     
     element_type r, g, b, a;
 };
@@ -145,8 +145,8 @@ struct ABGR
 
     constexpr static size_t	size = 4;
     
-    ABGR(element_type rr, element_type gg, element_type bb,
-	 element_type aa=255)	:a(aa), b(bb), g(gg), r(rr)		{}
+    constexpr	ABGR(element_type rr, element_type gg, element_type bb,
+		     element_type aa=255) :a(aa), b(bb), g(gg), r(rr)	{}
     
     element_type a, b, g, r;
 };
@@ -157,8 +157,8 @@ struct ARGB
 
     constexpr static size_t	size = 4;
 
-    ARGB(element_type rr, element_type gg, element_type bb,
-	 element_type aa=255)	:a(aa), r(rr), g(gg), b(bb)		{}
+    constexpr	ARGB(element_type rr, element_type gg, element_type bb,
+		     element_type aa=255) :a(aa), r(rr), g(gg), b(bb)	{}
     
     element_type a, r, g, b;
 };
@@ -169,8 +169,8 @@ struct BGRA
 
     constexpr static size_t	size = 4;
     
-    BGRA(element_type rr, element_type gg, element_type bb,
-	 element_type aa=255)	:b(bb), g(gg), r(rr), a(aa)		{}
+    constexpr BGRA(element_type rr, element_type gg, element_type bb,
+		   element_type aa=255)	:b(bb), g(gg), r(rr), a(aa)	{}
     
     element_type b, g, r, a;
 };
@@ -188,17 +188,17 @@ struct RGB_ : public E, boost::additive<RGB_<E>,
 {
     using	typename E::element_type;
     
-    RGB_()				:E(0, 0, 0)			{}
-    RGB_(element_type rr, element_type gg, element_type bb,
-	 element_type aa=255)		:E(rr, gg, bb, aa)		{}
+    constexpr	RGB_()				:E(0, 0, 0)		{}
+    constexpr	RGB_(element_type rr, element_type gg, element_type bb,
+		     element_type aa=255)	:E(rr, gg, bb, aa)	{}
     template <class E_>
-    RGB_(const RGB_<E_>& p)		:E(p.r, p.g, p.b, p.a)		{}
+    constexpr	RGB_(const RGB_<E_>& p)		:E(p.r, p.g, p.b, p.a)	{}
     template <class T_,
 	      std::enable_if_t<std::is_convertible<T_, element_type>::value>*
 	      = nullptr>
-    RGB_(const T_& p)
+    constexpr	RGB_(const T_& p)
 	:E(element_type(p), element_type(p), element_type(p))		{}
-    RGB_(const YUV444& p)						;
+    constexpr	RGB_(const YUV444& p)					;
     
     using	E::r;
     using	E::g;
@@ -280,10 +280,10 @@ struct YUV444
     using element_type = u_char;
     constexpr static size_t	size = 3;
 
-    YUV444(element_type yy=0, element_type uu=128, element_type vv=128)
-		    :u(uu), y(yy), v(vv)				{}
+    constexpr	YUV444(element_type yy=0, element_type uu=128,
+		       element_type vv=128)	:u(uu), y(yy), v(vv)	{}
     template <class E>
-    YUV444(const RGB_<E>& p)
+    constexpr	YUV444(const RGB_<E>& p)
 		    :y(detail::colorConverter.y<element_type>(p.r, p.g, p.b))
 		{
 		    u = detail::colorConverter.u(p.b, y);
@@ -292,7 +292,7 @@ struct YUV444
     template <class T,
 	      std::enable_if_t<std::is_convertible<T, element_type>::value>*
 	      = nullptr>
-    YUV444(const T& p)	:u(128), y(p), v(128)				{}
+    constexpr	YUV444(const T& p)	:u(128), y(p), v(128)		{}
     
     template <class T,
 	      std::enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
@@ -323,7 +323,7 @@ operator <<(std::ostream& out, const YUV444& yuv)
     return out << u_int(yuv.y) << ' ' << u_int(yuv.u) << ' ' << u_int(yuv.v);
 }
 
-template <class E> inline
+template <class E> constexpr inline
 RGB_<E>::RGB_(const YUV444& p)
     :E(detail::colorConverter.r(p.y, p.v),
        detail::colorConverter.g(p.y, p.u, p.v),
@@ -339,8 +339,9 @@ struct YUV422
     using element_type = u_char;
     constexpr static size_t	size = 2;
 
-    YUV422(element_type yy=0, element_type xx=128)	:x(xx), y(yy)	{}
-    YUV422(const YUYV422& p)						;
+    constexpr	YUV422(element_type yy=0, element_type xx=128)
+		    :x(xx), y(yy)					{}
+    constexpr	YUV422(const YUYV422& p)				;
 
     template <class T,
 	      std::enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
@@ -375,8 +376,9 @@ struct YUYV422
     using element_type = u_char;
     constexpr static size_t	size = 2;
 
-    YUYV422(element_type yy=0, element_type xx=128)	:y(yy), x(xx)	{}
-    YUYV422(const YUV422& p)				:y(p.y), x(p.x)	{}
+    constexpr	YUYV422(element_type yy=0, element_type xx=128)
+		    :y(yy), x(xx)					{}
+    constexpr	YUYV422(const YUV422& p)	:y(p.y), x(p.x)		{}
 
     template <class T,
 	      std::enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
@@ -405,7 +407,7 @@ operator <<(std::ostream& out, const YUYV422& yuv)
     return out << u_int(yuv.y) << ' ' << u_int(yuv.x);
 }
 
-inline
+constexpr inline
 YUV422::YUV422(const YUYV422& p)  :x(p.x), y(p.y)	{}
 
 //! [U, Y0, Y1], [V, Y2, Y3]（各8bit）の順で並んだカラー画素(12bits/pixel)
@@ -415,11 +417,11 @@ struct YUV411
 
     constexpr static size_t	size = 3;
 
-    YUV411(element_type yy0=0, element_type yy1=0, element_type xx=128)
-	:x(xx), y0(yy0), y1(yy1)					{}
+    constexpr	YUV411(element_type yy0=0, element_type yy1=0,
+		       element_type xx=128) :x(xx), y0(yy0), y1(yy1)	{}
     template <class T,
 	      std::enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
-    YUV411(const T& p)	:x(128), y0(p), y1((&p)[1])			{}
+    constexpr	YUV411(const T& p)	:x(128), y0(p), y1((&p)[1])	{}
 
     bool	operator ==(const YUV411& p)	const	{return (x  == p.x  &&
 								 y0 == p.y0 &&
