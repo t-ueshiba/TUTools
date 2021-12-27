@@ -775,6 +775,12 @@ stride(const range_iterator<ITER, STRIDE, SIZE>& iter)
     return iter.stride();
 }
 
+template <class ITER> auto
+stride(const ITER& iter) -> decltype(stride(iter.base()))
+{
+    return stride(iter.base());
+}
+
 template <class... ITER> inline auto
 stride(const std::tuple<ITER...>& iter_tuple)
     -> std::tuple<decltype(stride(std::declval<ITER>()))...>
@@ -793,7 +799,7 @@ stride(const zip_iterator<ITER_TUPLE>& iter)
 template <class ITER0, class ITER1, class... ITERS> inline auto
 stride(const ITER0& iter0, const ITER1& iter1, const ITERS&... iters)
 {
-    return std::make_tuple(stride(iter0), stride(iter1), stride(iters)...);
+    return stride(std::make_tuple(iter0, iter1, iters...));
 }
 
 /************************************************************************
