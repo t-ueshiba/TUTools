@@ -10,62 +10,6 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 #include "TU/tuple.h"
 
-namespace std
-{
-#if __cplusplus < 201402L    
-/************************************************************************
-*  std::[rbegin|rend|cbegin|cend|crbegin|crend](T)			*
-************************************************************************/
-template <class T> inline auto
-rbegin(const T& x) -> decltype(x.rbegin())
-{
-    return x.rbegin();
-}
-    
-template <class T> inline auto
-rbegin(T& x) -> decltype(x.rbegin())
-{
-    return x.rbegin();
-}
-    
-template <class T> inline auto
-rend(const T& x) -> decltype(x.rend())
-{
-    return x.rend();
-}
-    
-template <class T> inline auto
-rend(T& x) -> decltype(x.rend())
-{
-    return x.rend();
-}
-
-template <class T> inline auto
-cbegin(const T& x) -> decltype(std::begin(x))
-{
-    return std::begin(x);
-}
-    
-template <class T> inline auto
-cend(const T& x) -> decltype(std::end(x))
-{
-    return std::end(x);
-}
-
-template <class T> inline auto
-crbegin(const T& x) -> decltype(std::rbegin(x))
-{
-    return std::rbegin(x);
-}
-    
-template <class T> inline auto
-crend(const T& x) -> decltype(std::rend(x))
-{
-    return std::rend(x);
-}
-#endif
-}	// namespace std
-
 namespace TU
 {
 /************************************************************************

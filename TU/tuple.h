@@ -13,17 +13,6 @@
 #include <iostream>
 #include "TU/type_traits.h"	// for TU::any<PRED, T...>
 
-namespace std
-{
-#if __cplusplus < 201402L
-template <class ITER> inline auto
-make_reverse_iterator(ITER iter)
-{
-    return reverse_iterator<ITER>(iter);
-}
-#endif
-}	// namespace std
-    
 namespace TU
 {
 /************************************************************************
