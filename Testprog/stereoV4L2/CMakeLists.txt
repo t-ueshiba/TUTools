@@ -11,4 +11,4 @@ add_executable(
     ${EXTERNAL_SOURCE_DIR}/DrawThreeD.cc
     ${EXTERNAL_SOURCE_DIR}/MyCanvasPane.cc
 )
-target_link_libraries(${PROJECT_NAME} TUOgl++ TUvV4L2++)
+target_link_libraries(${PROJECT_NAME} TUvOgl TUvV4L2)

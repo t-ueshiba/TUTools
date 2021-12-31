@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(TUTools++)
+project(TUTools)
 
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD		14)
@@ -53,7 +53,7 @@ install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib)
 add_subdirectory(TU)
 add_subdirectory(cmake_modules)
 
-option(BUILD_TUTOOLSPP_TEST_PROGRAMS "Building test programs for TUTools++" OFF)
+option(BUILD_TUTOOLSPP_TEST_PROGRAMS "Building test programs for TUTools" OFF)
 
 if(BUILD_TUTOOLSPP_TEST_PROGRAMS)
   add_subdirectory(Testprog)
