@@ -68,21 +68,6 @@ rend(T&& x) -> decltype(std::rend(x))
 }
 
 /************************************************************************
-*  TU::size(const T&)							*
-************************************************************************/
-template <class T> inline auto
-size(const T& x) -> decltype(x.size())
-{
-    return x.size();
-}
-
-template <class... T> inline auto
-size(const std::tuple<T...>& t) -> decltype(size(std::get<0>(t)))
-{
-    return size(std::get<0>(t));
-}
-
-/************************************************************************
 *  map_iterator<FUNC, ITER>						*
 ************************************************************************/
 template <class FUNC, class ITER>
@@ -90,15 +75,15 @@ class map_iterator
     : public boost::iterator_adaptor<map_iterator<FUNC, ITER>,
 	ITER,
 	std::decay_t<
-	    decltype(apply(std::declval<FUNC>(),
-			   std::declval<iterator_reference<ITER> >()))>,
+	    decltype(TU::apply(std::declval<FUNC>(),
+			       std::declval<iterator_reference<ITER> >()))>,
 	boost::use_default,
-	decltype(apply(std::declval<FUNC>(),
-		       std::declval<iterator_reference<ITER> >()))>
+	decltype(TU::apply(std::declval<FUNC>(),
+			   std::declval<iterator_reference<ITER> >()))>
 {
   private:
-    using ref	= decltype(apply(std::declval<FUNC>(),
-				 std::declval<iterator_reference<ITER> >()));
+    using ref	= decltype(TU::apply(std::declval<FUNC>(),
+				     std::declval<iterator_reference<ITER> >()));
     using super	= boost::iterator_adaptor<map_iterator,
 					  ITER,
 					  std::decay_t<ref>,
@@ -116,7 +101,8 @@ class map_iterator
     const auto&	functor()	const	{ return _func; }
 	
   private:
-    reference	dereference()	const	{ return apply(_func, *super::base()); }
+    reference	dereference()	const	{ return TU::apply(_func,
+							   *super::base()); }
 	
   private:
     FUNC	_func;	//!< 演算子

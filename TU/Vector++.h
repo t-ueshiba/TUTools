@@ -48,7 +48,7 @@ homogeneous(const E& expr)
 					     Array<element_type, 0>,
 					     Array<element_type, N+1> >;
 
-    const auto	n = size(expr);
+    const auto	n = std::size(expr);
     result_type	r(n + 1);
     slice(r, 0, n) = expr;
     r[n]	   = 1;
@@ -68,7 +68,7 @@ inhomogeneous(const E& expr)
 					     Array<element_type, 0>,
 					     Array<element_type, N-1> >;
 
-    const auto	n = size(expr) - 1;
+    const auto	n = std::size(expr) - 1;
     return result_type(slice(expr, 0, n) / *(std::cbegin(expr) + n));
 }
 
@@ -100,7 +100,7 @@ trace(const E& expr)
     assert(size<0>(expr) == size<1>(expr));
 
     element_t<E>	val = 0;
-    for (size_t i = 0; i < size(expr); ++i)
+    for (size_t i = 0; i < std::size(expr); ++i)
 	val += expr[i][i];
     return val;
 }
@@ -290,7 +290,7 @@ template <class T, size_t N>
 template <class E_> std::enable_if_t<rank<E_>() == 1, E_&>
 LUDecomposition<T, N>::substitute(E_&& b) const
 {
-    if (TU::size(b) != size())
+    if (std::size(b) != size())
 	throw std::invalid_argument("TU::LUDecomposition<T>::substitute: Dimension of given vector is not equal to mine!!");
 
   // tmpはbと異なる実体でなければならないので，
@@ -405,7 +405,7 @@ solve(const E& A, F&& B)
     LUDecomposition<element_t<E>, size0<E>()>	lu(A);
     for_each<size0<F>()>([&lu](auto&& b)
 			 { lu.substitute(std::forward<decltype(b)>(b)); },
-			 size(B), begin(B));
+			 std::size(B), begin(B));
     return B;
 }
     
@@ -420,7 +420,7 @@ inverse(const E& A)
     using	element_type = element_t<E>;
     
     constexpr size_t		N = size0<E>();
-    Array2<element_type, N, N>	B = diag<N>(element_type(1), size(A));
+    Array2<element_type, N, N>	B = diag<N>(element_type(1), std::size(A));
     return solve(A, B);
 }
     
@@ -1762,7 +1762,7 @@ rotation(const E& v)
 {
     using	T = element_t<E>;
     
-    if (size(v) == 4)		// quaternion ?
+    if (std::size(v) == 4)		// quaternion ?
     {
 	const T		q0 = v[0];
 	Array<T, 3>	q{{v[1], v[2], v[3]}};

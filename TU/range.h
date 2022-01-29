@@ -182,7 +182,7 @@ size0()
 }
     
 /************************************************************************
-*  size<E>()								*
+*  size<I>(const E&)							*
 ************************************************************************/
 namespace detail
 {
@@ -206,12 +206,12 @@ namespace detail
   template <class E> inline auto
   size(const E& expr, std::integral_constant<size_t, 0>)
   {
-      return TU::size(expr);
+      return std::size(expr);
   }
   template <size_t I, class E> inline auto
   size(const E& expr, std::integral_constant<size_t, I>)
   {
-      return size(*begin(expr), std::integral_constant<size_t, I-1>());
+      return size(*std::begin(expr), std::integral_constant<size_t, I-1>());
   }
 }	// namespace detail
 
@@ -390,7 +390,7 @@ class range
 		{
 		    using	TU::begin;
 
-		    assert(TU::size(expr) == SIZE);
+		    assert(std::size(expr) == SIZE);
 		    copy<SIZE>(begin(expr), SIZE, _begin);
 		    return *this;
 		}
@@ -482,7 +482,7 @@ class range<ITER, 0>
 		{
 		    using	TU::begin;
 		    
-		    assert(TU::size(expr) == _size);
+		    assert(std::size(expr) == _size);
 		    copy<TU::size0<E_>()>(begin(expr), _size, _begin);
 		    return *this;
 		}
@@ -1054,13 +1054,13 @@ inline auto
 make_map_iterator(detail::mapped_tag<T, MASK, FUNC>&& m, const ITER& iter)
 {
     return make_range_iterator(make_map_iterator(std::move(m), begin(*iter)),
-			       stride(iter), size(*iter));
+			       stride(iter), std::size(*iter));
 }
     
 template <class ARG, class T, bool MASK, class FUNC> inline auto
 operator >>(const ARG& x, detail::mapped_tag<T, MASK, FUNC>&& m)
 {
-    return make_range(make_map_iterator(std::move(m), begin(x)), size(x));
+    return make_range(make_map_iterator(std::move(m), begin(x)), std::size(x));
 }
 
 /************************************************************************
@@ -1119,9 +1119,11 @@ make_column_iterator(ROW row, size_t nrows, size_t col)
 template <class E> inline auto
 column_begin(E&& expr)
 {
+    using std::begin;
+    
     constexpr auto	N = size0<E>();
     
-    return make_column_iterator<N>(begin(expr), size(expr), 0);
+    return make_column_iterator<N>(begin(expr), std::size(expr), 0);
 }
 
 template <class E> inline auto
@@ -1133,9 +1135,11 @@ column_cbegin(const E& expr)
 template <class E> inline auto
 column_end(E&& expr)
 {
+    using std::begin;
+    
     constexpr auto	N = size0<E>();
     
-    return make_column_iterator<N>(begin(expr), size(expr), size<1>(expr));
+    return make_column_iterator<N>(begin(expr), std::size(expr), size<1>(expr));
 }
 
 template <class E> inline auto
@@ -1337,7 +1341,7 @@ operator *=(E&& expr, element_t<E> c)
 {
     constexpr size_t	N = size0<E>();
     
-    for_each<N>([c](auto&& x){ x *= c; }, size(expr), begin(expr));
+    for_each<N>([c](auto&& x){ x *= c; }, std::size(expr), begin(expr));
     return expr;
 }
 
@@ -1352,7 +1356,7 @@ operator /=(E&& expr, element_t<E> c)
 {
     constexpr size_t	N = size0<E>();
     
-    for_each<N>([c](auto&& x){ x /= c; }, size(expr), begin(expr));
+    for_each<N>([c](auto&& x){ x /= c; }, std::size(expr), begin(expr));
     return expr;
 }
 
@@ -1403,7 +1407,7 @@ operator +=(L&& l, const R& r)
     constexpr size_t	N = detail::max<size0<L>(), size0<R>()>::value;
     
     for_each<N>([](auto&& x, const auto& y){ x += y; },
-		size(l), begin(l), begin(r));
+		std::size(l), begin(l), begin(r));
     return l;
 }
 
@@ -1420,7 +1424,7 @@ operator -=(L&& l, const R& r)
     constexpr size_t	N = detail::max<size0<L>(), size0<R>()>::value;
     
     for_each<N>([](auto&& x, const auto& y){ x -= y; },
-		size(l), begin(l), begin(r));
+		std::size(l), begin(l), begin(r));
     return l;
 }
 
@@ -1530,7 +1534,7 @@ transpose(E&& expr)
 template <class E, std::enable_if_t<(rank<E>() != 0)>* = nullptr> inline auto
 square(const E& expr)
 {
-    return square<size0<E>()>(begin(expr), size(expr));
+    return square<size0<E>()>(std::begin(expr), std::size(expr));
 }
 
 //! 与えられた式の各要素の自乗和の平方根を求める.

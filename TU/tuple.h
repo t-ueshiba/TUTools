@@ -580,7 +580,7 @@ make_zip_iterator(const ITER& iter, const ITERS&... iters)
 }
 
 /************************************************************************
-*  TU::[begin|end|rbegin|rend](TUPLE&&)					*
+*  TU::[begin|end|rbegin|rend|size](TUPLE&&)				*
 ************************************************************************/
 namespace detail
 {
@@ -714,6 +714,18 @@ crend(const std::tuple<T...>& t) -> decltype(rend(t))
     return rend(t);
 }
 
+template <class E> inline auto
+size(const E& expr) -> decltype(std::size(expr))
+{
+    return std::size(expr);
+}
+
+template <class... T> inline auto
+size(const std::tuple<T...>& t) -> decltype(TU::size(std::get<0>(t)))
+{
+    return TU::size(std::get<0>(t));
+}
+
 /************************************************************************
 *  type alias: decayed_iterator_value<ITER>				*
 ************************************************************************/
@@ -745,31 +757,14 @@ using decayed_iterator_value = typename detail::decayed_iterator_value<ITER>
 /************************************************************************
 *  Applying a multi-input function to a tuple of arguments		*
 ************************************************************************/
-namespace detail
-{
-  template <class FUNC, class TUPLE, size_t... IDX> inline decltype(auto)
-  apply(FUNC&& f, TUPLE&& t, std::index_sequence<IDX...>)
-  {
-      return f(std::get<IDX>(std::forward<TUPLE>(t))...);
-  }
-}
-
-//! 複数の引数をまとめたtupleを関数に適用する
-/*!
-  t が std::tuple でない場合は f を1引数関数とみなして t をそのまま渡す．
-  \param f	関数
-  \param t	引数をまとめたtuple
-  \return	関数の戻り値
-*/
 template <class FUNC, class TUPLE,
 	  std::enable_if_t<is_tuple<TUPLE>::value>* = nullptr>
 inline decltype(auto)
 apply(FUNC&& f, TUPLE&& t)
 {
-    return detail::apply(std::forward<FUNC>(f), std::forward<TUPLE>(t),
-			 std::make_index_sequence<
-			     std::tuple_size<std::decay_t<TUPLE> >::value>());
+    return std::apply(std::forward<FUNC>(f), std::forward<TUPLE>(t));
 }
+
 template <class FUNC, class T,
 	  std::enable_if_t<!is_tuple<T>::value>* = nullptr>
 inline decltype(auto)
@@ -777,7 +772,7 @@ apply(FUNC&& f, T&& t)
 {
     return f(std::forward<T>(t));
 }
-    
+
 }	// namespace TU
 
 namespace std
