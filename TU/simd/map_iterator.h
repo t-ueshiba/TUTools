@@ -31,9 +31,9 @@ namespace detail
   template <class T, class FUNC, class ITERS>
   using map_iterator_result
 		= decltype(
-			apply(
-			    std::declval<FUNC>(),
-			    std::declval<replace_element<ITERS, vec<T> > >()));
+		    TU::apply(
+			std::declval<FUNC>(),
+			std::declval<replace_element<ITERS, vec<T> > >()));
 }
     
 //! 入力を適切に変換してから関数を適用し，結果をconvert downする．
@@ -224,7 +224,7 @@ class map_iterator
     std::enable_if_t<(vsize<ITERS_>::max <= vec<T>::size)>
 		exec(ITERS_&& iters) const
 		{
-		    apply(_func, cvtdown<vec<T>::size>(iters));
+		    TU::apply(_func, cvtdown<vec<T>::size>(iters));
 		}
     template <class ITERS_>
     std::enable_if_t<(vsize<ITERS_>::max > vec<T>::size)>
@@ -245,7 +245,7 @@ class map_iterator
 		    constexpr auto	N = vec<T>::size;
 
 		  // 戻り値は T と同位
-		    return cvtdown<N, T_>(apply(_func, cvtdown<N>(iters)));
+		    return cvtdown<N, T_>(TU::apply(_func, cvtdown<N>(iters)));
 		}
     template <class T_, class ITERS_,
 	      std::enable_if_t<(vsize<ITERS_>::max > vec<T>::size)>* = nullptr>

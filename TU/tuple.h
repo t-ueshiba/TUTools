@@ -714,16 +714,12 @@ crend(const std::tuple<T...>& t) -> decltype(rend(t))
     return rend(t);
 }
 
-template <class E> inline auto
-size(const E& expr) -> decltype(std::size(expr))
+template <class... T> inline std::size_t
+size(const std::tuple<T...>& t)
 {
-    return std::size(expr);
-}
-
-template <class... T> inline auto
-size(const std::tuple<T...>& t) -> decltype(TU::size(std::get<0>(t)))
-{
-    return TU::size(std::get<0>(t));
+    using	std::size;
+    
+    return size(std::get<0>(t));
 }
 
 /************************************************************************

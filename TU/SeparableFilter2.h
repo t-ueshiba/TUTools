@@ -169,6 +169,7 @@ template <class F> template <class IN_, class OUT_> void
 SeparableFilter2<F>::convolve(IN_ ib, IN_ ie, OUT_ out, bool shift) const
 {
     using buf_type	= Array2<typename filter_type::element_type>;
+    using std::size;
     
     if (ib == ie)
 	return;

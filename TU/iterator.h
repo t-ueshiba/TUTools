@@ -82,8 +82,9 @@ class map_iterator
 			   std::declval<iterator_reference<ITER> >()))>
 {
   private:
-    using ref	= decltype(TU::apply(std::declval<FUNC>(),
-				     std::declval<iterator_reference<ITER> >()));
+    using ref	= decltype(TU::apply(
+			       std::declval<FUNC>(),
+			       std::declval<iterator_reference<ITER> >()));
     using super	= boost::iterator_adaptor<map_iterator,
 					  ITER,
 					  std::decay_t<ref>,
@@ -108,7 +109,7 @@ class map_iterator
     FUNC	_func;	//!< 演算子
 };
 
-template <class T=void, class FUNC, class... ITER> inline auto
+template <class FUNC, class... ITER> inline auto
 make_map_iterator(FUNC&& func, const ITER&... iter)
 {
     using iters_t = decltype(TU::make_zip_iterator(iter...));

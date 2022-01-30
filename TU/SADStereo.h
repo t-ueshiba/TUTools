@@ -183,6 +183,8 @@ SADStereo<SCORE, DISP>::getOverlap() const
 template <class SCORE, class DISP> template <class ROW, class ROW_D> void
 SADStereo<SCORE, DISP>::match(ROW rowL, ROW rowLe, ROW rowR, ROW_D rowD)
 {
+    using	std::size;
+    
     start(0);
     const size_t	N = _params.windowSize,
 			D = _params.disparitySearchWidth,
@@ -248,6 +250,8 @@ template <class SCORE, class DISP> template <class ROW, class ROW_D> void
 SADStereo<SCORE, DISP>::match(ROW rowL, ROW rowLe, ROW rowLlast,
 			      ROW rowR, ROW rowV, ROW_D rowD)
 {
+    using	std::size;
+    
     start(0);
     const size_t	N = _params.windowSize,
 			D = _params.disparitySearchWidth,

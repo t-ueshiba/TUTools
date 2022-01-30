@@ -283,6 +283,8 @@ GFStereo<SCORE, DISP>::getOverlap() const
 template <class SCORE, class DISP> template <class ROW, class ROW_D> void
 GFStereo<SCORE, DISP>::match(ROW rowL, ROW rowLe, ROW rowR, ROW_D rowD)
 {
+    using	std::size;
+    
     start(0);
     const size_t	H = std::distance(rowL, rowLe),
 			W = (H != 0 ? size(*rowL) : 0),

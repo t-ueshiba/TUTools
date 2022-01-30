@@ -19,6 +19,7 @@ std::istream&
 GenericImage::restoreData(std::istream& in)
 {
     using	std::begin;
+    using	std::size;
     
     _colormap.resize(_format.ncolors());
     _colormap.restore(in);
@@ -51,6 +52,7 @@ std::ostream&
 GenericImage::saveData(std::ostream& out) const
 {
     using	std::cbegin;
+    using	std::size;
     
     if (_colormap.size() > 0)
     {

@@ -1035,7 +1035,9 @@ namespace detail
 		}
       auto	size() const
 		{
-		    return std::size(_l);
+		    using	std::size;
+		    
+		    return size(_l);
 		}
       decltype(auto)
 		operator [](size_t i) const
@@ -1101,6 +1103,8 @@ namespace detail
 		{
 		    if (!_valid)
 		    {
+			using	std::size;
+			
 			constexpr auto	N = max<TU::size0<L>(),
 						TU::size0<R>(), 1>::value - 1;
 			
@@ -1109,7 +1113,7 @@ namespace detail
 			_cache = *a * *b;
 			for_each<N>([this](const auto& x, const auto& y)
 				    { _cache += x * y; },
-				    std::size(_l) - 1, ++a, ++b);
+				    size(_l) - 1, ++a, ++b);
 			_valid = true;
 		    }
 
@@ -1146,10 +1150,11 @@ inline auto
 operator *(const L& l, const R& r)
 {
     using element_type = std::common_type_t<element_t<L>, element_t<R> >;
-
+    using std::size;
+    
     assert(size<0>(l) == size<0>(r));
     constexpr size_t	S = detail::max<size0<L>(), size0<R>()>::value;
-    return inner_product<S>(begin(l), std::size(l), begin(r), element_type(0));
+    return inner_product<S>(begin(l), size(l), begin(r), element_type(0));
 }
 
 //! 1次元配列式と転置されていない2次元配列式の積をとる.

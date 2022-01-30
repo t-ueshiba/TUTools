@@ -241,6 +241,7 @@ GuidedFilter2<T>::convolve(IN ib, IN ie,
     using		std::cbegin;
     using		std::cend;
     using		std::begin;
+    using		std::size;
     using coeff_t	= replace_element<
 				iterator_substance<
 				    iterator_t<
@@ -298,6 +299,7 @@ GuidedFilter2<T>::convolve(IN ib, IN ie, OUT out, bool shift) const
     using		std::cbegin;
     using		std::cend;
     using		std::begin;
+    using		std::size;
     using coeff_t	= replace_element<
 				iterator_substance<
 				    iterator_t<
