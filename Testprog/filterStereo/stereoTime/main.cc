@@ -68,14 +68,14 @@ doJob(const Image<T>& imageL, const Image<T>& imageR,
 						  std::cbegin(*rowL),
 						  std::cbegin(*rowR)),
 			    std::make_tuple(stride(rowL), stride(rowR)),
-			    TU::size(*rowL));
+			    std::size(*rowL));
     const auto	rowIe = make_range_iterator(
 			    make_diff_iterator<S>(params.disparitySearchWidth,
 						  params.intensityDiffMax,
 						  std::cbegin(*rowLe),
 						  std::cbegin(*rowRe)),
 			    std::make_tuple(stride(rowLe), stride(rowRe)),
-			    TU::size(*rowLe));
+			    std::size(*rowLe));
 
     Image<S, allocator<S> >
 		disparityMap(rectify.width(0), rectify.height(0));

@@ -1071,6 +1071,8 @@ namespace detail
 		    :_l(std::forward<L>(l)), _r(std::forward<R>(r)),
 		     _valid(false), _cache()
 		{
+		    using	std::size;
+		    
 		    assert(size(l) == size(r));
 		}
       
