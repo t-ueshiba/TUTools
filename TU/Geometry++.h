@@ -1388,7 +1388,7 @@ class Similarity : public Affinity<T, D, D>
     template <class E_> std::enable_if_t<rank<E_>() == 2, Similarity&>
 			operator =(const E_& expr)
 			{
-			    if (std::size<0>(expr) != std::size<1>(expr))
+			    if (TU::size<0>(expr) != TU::size<1>(expr))
 				throw std::invalid_argument("Similarity::set(): non-square matrix!!");
 			    base_type::operator =(expr);
 			    return *this;
@@ -1730,7 +1730,7 @@ class Rigidity : public Affinity<T, D, D>
     template <class E_> std::enable_if_t<rank<E_>() == 2, Rigidity&>
 			operator =(const E_& expr)
 			{
-			    if (std::size<0>(expr) != std::size<1>(expr))
+			    if (TU::size<0>(expr) != TU::size<1>(expr))
 				throw std::invalid_argument("Rigidity::set(): non-square matrix!!");
 			    base_type::operator =(expr);
 			    return *this;
