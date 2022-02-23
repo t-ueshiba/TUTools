@@ -7,11 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED	ON)
 set(CMAKE_CXX_EXTENSIONS	OFF)
 set(CMAKE_CXX_FLAGS_RELEASE	"-Wall -O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG	"-g")
-set(CMAKE_BUILD_TYPE		Release)
-add_definitions(-DNDEBUG)
 
 set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules")
+include(BuildType)
 include(FindSIMD)
 FindSIMD()
 
