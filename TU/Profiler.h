@@ -90,7 +90,8 @@ class Profiler
     \param out	出力ストリーム
   */
     template <class PERIOD=std::milli>
-    void	print(std::ostream& out) const
+    std::ostream&
+		print(std::ostream& out) const
 		{
 		    auto	total = duration::zero();
 
@@ -101,16 +102,17 @@ class Profiler
 		    }
 		    out << '|';
 		    print<PERIOD>(out, total);
-		    out << std::endl;
+		    return out << std::endl;
 		}
 
     template <class PERIOD=std::milli>
-    void	printTabSeparated(std::ostream& out) const
+    std::ostream&
+		printTabSeparated(std::ostream& out) const
 		{
 		    using dr =std::chrono::duration<float, PERIOD>;
-
+		    
 		    auto	total = duration::zero();
-
+		    
 		    for (const auto& accum : _accums)
 		    {
 			if (_nframes > 0)
@@ -118,27 +120,29 @@ class Profiler
 			out << '\t';
 			total += accum;
 		    }
-		    out << "| " << dr(total).count()/_nframes << std::endl;
+		    return out << "| " << dr(total).count()/_nframes
+			       << std::endl;
 		}
 
   private:
     template <class PERIOD>
-    void	print(std::ostream& out, const duration& d) const
+    std::ostream&
+		print(std::ostream& out, const duration& d) const
 		{
 		    using std::setw;
 		    using dr = std::chrono::duration<float, PERIOD>;
-		    using ds = std::chrono::duration<float, std::ratio<1> >;
+		    using ds = std::chrono::duration<float,
+						     std::ratio<1> >;
 	
 		    if (_nframes > 0)
 		    {
-			out << setw(9)
-			    << dr(d).count()/_nframes << cap(PERIOD())
-			    << '(' << setw(7)
-			    << _nframes/ds(d).count() << "fps)";
+			return out << setw(9) << dr(d).count()/_nframes
+				   << cap(PERIOD()) << '(' << setw(7)
+				   << _nframes/ds(d).count() << "fps)";
 		    }
 		    else
-			out << setw(9) << '*' << cap(PERIOD()) << '('
-			    << setw(7) << '*' << "fps)";
+			return out << setw(9) << '*' << cap(PERIOD()) << '('
+				   << setw(7) << '*' << "fps)";
 		}
 
     static std::string	cap(std::pico)		{ return std::string("ps"); }
