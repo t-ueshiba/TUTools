@@ -738,15 +738,15 @@ class range_iterator
 		}
     void	increment()
 		{
-		    advance_stride(super::base_reference(), stride());
+		    TU::advance_stride(super::base_reference(), stride());
 		}
     void	decrement()
 		{
-		    advance_stride(super::base_reference(), -stride());
+		    TU::advance_stride(super::base_reference(), -stride());
 		}
     void	advance(difference_type n)
 		{
-		    advance_stride(super::base_reference(), n*stride());
+		    TU::advance_stride(super::base_reference(), n*stride());
 		}
     difference_type
 		distance_to(const range_iterator& iter) const

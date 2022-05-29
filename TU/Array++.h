@@ -604,7 +604,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 		    using		TU::begin;
 		    constexpr auto	S = detail::max<size0(),
 							TU::size0<E_>()>::value;
-		    copy<S>(begin(expr), size(), array::begin());
+		    copy<S>(begin(expr), size(), super::begin());
 		}
     template <class E_>
     std::enable_if_t<TU::rank<E_>() == rank() + TU::rank<T>(), array&>
@@ -617,7 +617,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 				  super::Alignment);
 		    constexpr auto	S = detail::max<size0(),
 							TU::size0<E_>()>::value;
-		    copy<S>(begin(expr), size(), array::begin());
+		    copy<S>(begin(expr), size(), super::begin());
 
 		    return *this;
 		}
