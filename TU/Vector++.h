@@ -28,7 +28,7 @@ template <class E, std::enable_if_t<rank<E>() == 1>* = nullptr> inline auto
 skew(const E& expr)
 {
     using result_t = Array2<element_t<E>, 3, 3>;
-    
+
     assert(size<0>(expr) == 3);
 
     const auto&	a = evaluate(expr);
@@ -136,7 +136,7 @@ cholesky(const E& A)
 	    for (size_t k = j; k < Li.size(); ++k)
 		Lt[j][k] -= (Li[j] * Li[k]);
     }
-    
+
     return Lt;
 }
 
@@ -148,7 +148,7 @@ template <class T, size_t N> Array2<T, N, N>&
 symmetrize(Array2<T, N, N>& a)
 {
     assert(a.nrow() == a.ncol());
-    
+
     for (size_t i = 0; i < a.nrow(); ++i)
 	for (size_t j = 0; j < i; ++j)
 	    a[j][i] = a[i][j];
@@ -163,7 +163,7 @@ template <class T, size_t N> Array2<T, N, N>&
 antisymmetrize(Array2<T, N, N>& a)
 {
     assert(a.nrow() == a.ncol());
-    
+
     for (size_t i = 0; i < a.nrow(); ++i)
     {
 	a[i][i] = 0.0;
@@ -193,7 +193,7 @@ class LUDecomposition
   */
     auto		det()			const	{ return _det; }
     auto		size()			const	{ return _A.size(); }
-	
+
   private:
     Array2<T, N, N>	_A;
     Array<size_t>	_indices;
@@ -258,7 +258,7 @@ LUDecomposition<T, N>::LUDecomposition(const E_& expr)
 	}
 	if (jmax != i)			// pivotting required ?
 	{
-	  // Swap i-th and jmax-th column	    
+	  // Swap i-th and jmax-th column
 	    for (size_t k = 0; k < size(); ++k)
 		std::swap(_A[k][i], _A[k][jmax]);
 	    std::swap(_indices[i], _indices[jmax]);	// swap column indices
@@ -401,14 +401,14 @@ inline std::enable_if_t<rank<E>() == 2 && rank<F>() == 2, F&>
 solve(const E& A, F&& B)
 {
     using	std::begin;
-    
+
     LUDecomposition<element_t<E>, size0<E>()>	lu(A);
     for_each<size0<F>()>([&lu](auto&& b)
 			 { lu.substitute(std::forward<decltype(b)>(b)); },
 			 std::size(B), begin(B));
     return B;
 }
-    
+
 //! 行列の逆行列を返す．
 /*!
   \param A	正則な正方行列
@@ -418,12 +418,12 @@ template <class E, std::enable_if_t<rank<E>() == 2>* = nullptr> inline auto
 inverse(const E& A)
 {
     using	element_type = element_t<E>;
-    
+
     constexpr size_t		N = size0<E>();
     Array2<element_type, N, N>	B = diag<N>(element_type(1), std::size(A));
     return solve(A, B);
 }
-    
+
 /************************************************************************
 *  class Householder<T>							*
 ************************************************************************/
@@ -437,10 +437,10 @@ class Householder : public Array2<T>
 {
   private:
     using super	= Array2<T>;
-    
+
   public:
     using	typename super::element_type;
-    
+
   private:
     Householder(size_t dd, size_t d)
 	:super(dd, dd), _d(d), _sigma(super::nrow())		{}
@@ -448,7 +448,7 @@ class Householder : public Array2<T>
     Householder(const E_& a, size_t d)				;
 
     using		super::size;
-    
+
     void		apply_from_left(Array2<T>& a, size_t m)	;
     void		apply_from_right(Array2<T>& a, size_t m);
     void		apply_from_both(Array2<T>& a, size_t m)	;
@@ -480,11 +480,11 @@ Householder<T>::apply_from_left(Array2<T>& a, size_t m)
 {
     if (a.nrow() < size())
 	throw std::invalid_argument("TU::Householder<T>::apply_from_left: # of rows of given matrix is smaller than my dimension !!");
-    
+
     T	scale = 0.0;
     for (size_t i = m+_d; i < size(); ++i)
 	scale += std::fabs(a[i][m]);
-	
+
     if (scale != 0.0)
     {
 	T	h = 0.0;
@@ -497,7 +497,7 @@ Householder<T>::apply_from_left(Array2<T>& a, size_t m)
 	const T	s = (a[m+_d][m] > 0.0 ? std::sqrt(h) : -std::sqrt(h));
 	h	     += s * a[m+_d][m];			// H = u^2 / 2
 	a[m+_d][m]   += s;				// m-th col <== u
-	    
+
 	for (size_t j = m+1; j < a.ncol(); ++j)
 	{
 	    T	p = 0.0;
@@ -508,7 +508,7 @@ Householder<T>::apply_from_left(Array2<T>& a, size_t m)
 		a[i][j] -= a[i][m] * p;			// A = A - u*p'
 	    a[m+_d][j] = -a[m+_d][j];
 	}
-	    
+
 	for (size_t i = m+_d; i < size(); ++i)
 	    (*this)[m][i] = scale * a[i][m];		// copy u
 	_sigma[m+_d] = scale * s;
@@ -520,11 +520,11 @@ Householder<T>::apply_from_right(Array2<T>& a, size_t m)
 {
     if (a.ncol() < size())
 	throw std::invalid_argument("Householder<T>::apply_from_right: # of column of given matrix is smaller than my dimension !!");
-    
+
     T	scale = 0.0;
     for (size_t j = m+_d; j < size(); ++j)
 	scale += std::fabs(a[m][j]);
-	
+
     if (scale != 0.0)
     {
 	T	h = 0.0;
@@ -548,7 +548,7 @@ Householder<T>::apply_from_right(Array2<T>& a, size_t m)
 		a[i][j] -= p * a[m][j];			// A = A - p*u'
 	    a[i][m+_d] = -a[i][m+_d];
 	}
-	    
+
 	for (size_t j = m+_d; j < size(); ++j)
 	    (*this)[m][j] = scale * a[m][j];		// copy u
 	_sigma[m+_d] = scale * s;
@@ -562,7 +562,7 @@ Householder<T>::apply_from_both(Array2<T>& a, size_t m)
     T		scale = 0.0;
     for (size_t j = 0; j < u.size(); ++j)
 	scale += std::fabs(u[j]);
-	
+
     if (scale != 0.0)
     {
 	u /= scale;
@@ -647,7 +647,7 @@ class QRDecomposition
 {
   public:
     using element_type	= T;
-    
+
   public:
     template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
     QRDecomposition(const E_& A)				;
@@ -663,7 +663,7 @@ class QRDecomposition
     \return	回転行列\f$\TUtvec{Q}{}\f$
   */
     const Array2<T>&	Qt()			const	{ return _Qt; }
-    
+
   private:
     Array2<T>		_Rt;
     Householder<T>	_Qt;			// rotation matrix
@@ -727,7 +727,7 @@ class Rotation
 {
   public:
     using element_type	= T;	//!< 成分の型
-    
+
   public:
   //! 2次元超平面内での回転を生成する
   /*!
@@ -795,7 +795,7 @@ class Rotation
     \return	回転角のsin値
   */
     T		sin()				const	{return _s;}
-    
+
   //! この回転行列の転置を与えられた行列の左から掛ける．
   /*!
     \return	与えられた行列，すなわち
@@ -808,7 +808,7 @@ class Rotation
 		    for (size_t j = 0; j < size<1>(A); ++j)
 		    {
 			const auto	tmp = A[_p][j];
-	
+
 			A[_p][j] =  _c*tmp + _s*A[_q][j];
 			A[_q][j] = -_s*tmp + _c*A[_q][j];
 		    }
@@ -827,13 +827,13 @@ class Rotation
 		    for (auto&& a : A)
 		    {
 			const auto	tmp = a[_p];
-	
+
 			a[_p] =  tmp*_c + a[_q]*_s;
 			a[_q] = -tmp*_s + a[_q]*_c;
 		    }
 		    return A;
 		}
-    
+
   private:
     const size_t	_p, _q;		// rotation axis
     element_type	_l;		// length of (x, y)
@@ -854,7 +854,7 @@ class TriDiagonal
 {
   public:
     using element_type	= T;	//!< 成分の型
-    
+
   public:
     template <class E_, std::enable_if_t<rank<E_>() == 2>* = nullptr>
     TriDiagonal(const E_& a)				;
@@ -892,14 +892,14 @@ class TriDiagonal
 			    evals = std::move(_diagonal);
 			    return std::move(static_cast<Array2<T>&>(_Ut));
 			}
-    
+
   private:
     enum		{NITER_MAX = 30};
 
     bool		off_diagonal_is_zero(size_t n)		const	;
     void		initialize_rotation(size_t m, size_t n,
 					    T& x, T& y)		const	;
-    
+
     Householder<T>	_Ut;
     Array<T>		_diagonal;
     Array<T>&		_off_diagonal;
@@ -932,16 +932,16 @@ TriDiagonal<T>::TriDiagonal(const E_& a)
   \throw std::runtime_error	指定した繰り返し回数を越えた場合に送出
   \param abs	固有値をその絶対値の大きい順に並べるのであればtrue,
 		その値の大きい順に並べるのであればfalse
-*/ 
+*/
 template <class T> void
 TriDiagonal<T>::diagonalize(bool abs)
 {
     using namespace	std;
-    
+
     for (size_t n = size(); n-- > 0; )
     {
 	int	niter = 0;
-	
+
 #ifdef TU_DEBUG
 	cerr << "******** n = " << n << " ********" << endl;
 #endif
@@ -963,7 +963,7 @@ TriDiagonal<T>::diagonalize(bool abs)
 	    for (size_t i = m; ++i <= n; )
 	    {
 		Rotation<T>	rot(i-1, i, x, y);
-		
+
 		rot.apply_from_left(_Ut);
 
 		if (i > m+1)
@@ -984,7 +984,7 @@ TriDiagonal<T>::diagonalize(bool abs)
 	    }
 #ifdef TU_DEBUG
 	    cerr << "  niter = " << niter << ": " << off_diagonal();
-#endif	    
+#endif
 	}
     }
 
@@ -1048,7 +1048,7 @@ TriDiagonal<T>::initialize_rotation(size_t m, size_t n, T& x, T& y) const
 ************************************************************************/
 //! 対称行列の固有値と固有ベクトルを返す．
 /*!
-  \param A	対称行列 
+  \param A	対称行列
   \param evals	固有値が返される
   \param abs	固有値を絶対値の大きい順に並べるならtrue, 値の大きい順に
 		並べるならfalse
@@ -1072,7 +1072,7 @@ eigen(const E& A, F&& evals, bool abs=true)
 
 //! 対称行列の一般固有値と一般固有ベクトルを返す．
 /*!
-  \param A	対称行列 
+  \param A	対称行列
   \param BB	Aと同一サイズの正値対称行列
   \param evals	一般固有値が返される
   \param abs	一般固有値を絶対値の大きい順に並べるならtrue, 値の大きい順に
@@ -1115,7 +1115,7 @@ class BiDiagonal
 {
   public:
     using element_type = T;	//!< 成分の型
-    
+
   public:
     template <class E, std::enable_if_t<rank<E>() == 2>* = nullptr>
     BiDiagonal(const E& a)			;
@@ -1160,7 +1160,7 @@ class BiDiagonal
 
   private:
     enum		{NITER_MAX = 30};
-    
+
     bool		diagonal_is_zero(size_t n)		const	;
     bool		off_diagonal_is_zero(size_t n)		const	;
     void		initialize_rotation(size_t m, size_t n,
@@ -1222,16 +1222,16 @@ BiDiagonal<T>::BiDiagonal(const E& a)
   対角成分は特異値となり，\f$\TUtvec{U}{}\f$と\f$\TUtvec{V}{}\f$
   の各行はそれぞれ右特異ベクトルと左特異ベクトルを与える．
   \throw std::runtime_error	指定した繰り返し回数を越えた場合に送出
-*/ 
+*/
 template <class T> void
 BiDiagonal<T>::diagonalize()
 {
     using namespace	std;
-    
+
     for (size_t n = _Et.size(); n-- > 0; )
     {
 	size_t	niter = 0;
-	
+
 #ifdef TU_DEBUG
 	cerr << "******** n = " << n << " ********" << endl;
 #endif
@@ -1239,7 +1239,7 @@ BiDiagonal<T>::diagonalize()
 	{
 	    if (niter++ > NITER_MAX)
 		throw runtime_error("TU::BiDiagonal::diagonalize(): Number of iteration exceeded maximum value");
-	    
+
 	  /* Find first m (< n) whose off-diagonal element is 0 */
 	    size_t m = n;
 	    do
@@ -1253,7 +1253,7 @@ BiDiagonal<T>::diagonalize()
 			Rotation<T>	rotD(m-1, i, x, -y);
 
 			rotD.apply_from_left(_Dt);
-			
+
 			_diagonal[i] = -y*rotD.sin()
 				     + _diagonal[i]*rotD.cos();
 			if (i < n)
@@ -1283,7 +1283,7 @@ BiDiagonal<T>::diagonalize()
 	    {
 	      /* Apply rotation from left */
 		Rotation<T>	rotE(i-1, i, x, y);
-		
+
 		rotE.apply_from_left(_Et);
 
 		if (i > m+1)
@@ -1299,7 +1299,7 @@ BiDiagonal<T>::diagonalize()
 		_diagonal[i]	*=  rotE.cos();
 
 		x = _diagonal[i-1];
-		
+
 	      /* Apply rotation from right to recover bi-diagonality */
 		Rotation<T>	rotD(i-1, i, x, y);
 
@@ -1409,7 +1409,7 @@ class SVDecomposition : private BiDiagonal<T>
 {
   private:
     using super		= BiDiagonal<T>;
-    
+
   public:
     using element_type	= T;			//!< 成分の型
 
@@ -1457,7 +1457,7 @@ template <class E, std::enable_if_t<rank<E>() == 2>* = nullptr> auto
 pseudo_inverse(const E& A, element_t<E> cndnum=1.0e5)
 {
     using element_type	= element_t<E>;
-    
+
     SVDecomposition<element_type>	svd(A);
     Array2<element_type>		val(svd.ncol(), svd.nrow());
 
@@ -1503,9 +1503,9 @@ rotation_angle(const E& expr, element_t<E>& theta_x,
 	       element_t<E>& theta_y, element_t<E>& theta_z)
 {
     using	T = element_t<E>;
-    
+
     const auto&	Rt = evaluate(expr);
-    
+
     if (size<0>(Rt) != 3 || size<1>(Rt) != 3)
 	throw std::invalid_argument("TU::rot2angle: input matrix must be 3x3!!");
 
@@ -1543,7 +1543,7 @@ template <class E> std::enable_if_t<rank<E>() == 2, Array<element_t<E>, 3> >
 rotation_axis(const E& expr, element_t<E>& c, element_t<E>& s)
 {
     using	T = element_t<E>;
-    
+
     const auto&	Rt = expr;
 
     if (size<0>(Rt) != 3 || size<1>(Rt) != 3)
@@ -1577,7 +1577,7 @@ template <class E> std::enable_if_t<rank<E>() == 2, Array<element_t<E>, 3> >
 rotation_axis(const E& expr)
 {
     using	T = element_t<E>;
-    
+
     const auto&	Rt = expr;
 
     if (size<0>(Rt) != 3 || size<1>(Rt) != 3)
@@ -1587,7 +1587,7 @@ rotation_axis(const E& expr)
 		s2 = std::sqrt((T(1) + trace)*(T(3) - trace));	// 2*sin
     if (s2 + T(1) == T(1))			// sin << 1 ?
 	return Array<T, 3>();			// zero vector
-    
+
     Array<T, 3>	axis({Rt[1][2]-Rt[2][1], Rt[2][0]-Rt[0][2], Rt[0][1]-Rt[1][0]});
 
     return std::move(axis *= (std::atan2(s2, trace - T(1)) / s2));
@@ -1616,7 +1616,7 @@ template <class E> std::enable_if_t<rank<E>() == 2, Array<element_t<E>, 4> >
 quaternion(const E& expr)
 {
     using	T = element_t<E>;
-    
+
     const auto&	Rt = expr;
 
     if (size<0>(Rt) != 3 || size<1>(Rt) != 3)
@@ -1684,7 +1684,7 @@ rotation(T theta_x, T theta_y, T theta_z)
     const auto	sy = std::sin(theta_y);
     const auto	cz = std::cos(theta_z);
     const auto	sz = std::sin(theta_z);
-    
+
     Array2<T, 3, 3>	Qt;
     Qt[0][0] =  cy * cz;
     Qt[0][1] =  cy * sz;
@@ -1715,7 +1715,7 @@ template <class E>
 inline std::enable_if_t<rank<E>() == 1, Array2<element_t<E>, 3, 3>>
 rotation(const E& n, element_t<E> c, element_t<E> s)
 {
-    if (size(n) != 3)
+    if (std::size(n) != 3)
 	throw std::invalid_argument("TU::Rt: dimension of the argument \'n\' must be 3");
     const auto			nn = evaluate(n);
     Array2<element_t<E>, 3, 3>	Qt = nn % nn;
@@ -1761,7 +1761,7 @@ inline std::enable_if_t<rank<E>() == 1, Array2<element_t<E>, 3, 3>>
 rotation(const E& v)
 {
     using	T = element_t<E>;
-    
+
     if (std::size(v) == 4)		// quaternion ?
     {
 	const T		q0 = v[0];
