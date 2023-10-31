@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(TUTools)
 
 enable_language(CXX)
@@ -34,7 +34,12 @@ elseif(SSE2_FOUND)
   set(CMAKE_CXX_FLAGS -msse2)
 elseif(NEON_FOUND)
   add_definitions(-DNEON)
-  set(CMAKE_CXX_FLAGS "-mcpu=cortex-a7 -mtune=cortex-a7 -mfpu=neon -funsafe-math-optimizations")
+  if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(CMAKE_CXX_FLAGS "-mcpu=cortex-a7 -mtune=cortex-a7 -mfpu=neon
+  -funsafe-math-optimizations")
+  else()
+    set(CMAKE_CXX_FLAGS "-mcpu=apple-m2 -mtune=apple-m2")
+  endif()  
 endif()
 
 if(APPLE)
