@@ -48,8 +48,6 @@ class List
     };
     
     class Iterator
-	: public std::iterator<std::forward_iterator_tag, 
-			       value_type, difference_type, pointer, reference>
     {
       public:
 	typedef std::forward_iterator_tag		iterator_category;
@@ -87,9 +85,6 @@ class List
     };
 
     class ConstIterator
-	: public std::iterator<std::forward_iterator_tag,
-			       value_type, difference_type,
-			       const_pointer, const_reference>
     {
       public:
 	typedef std::forward_iterator_tag		iterator_category;

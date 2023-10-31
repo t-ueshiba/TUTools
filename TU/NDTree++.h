@@ -45,6 +45,8 @@ class NDTree
 	typedef S		value_type;	//!< 要素の型
 	typedef value_type&	reference;	//!< 要素への参照
 	typedef value_type*	pointer;	//!< 要素へのポインタ
+	typedef std::forward_iterator_tag
+				iterator_category;
 
       private:
 	struct NodeInfo
