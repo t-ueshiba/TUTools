@@ -21,11 +21,11 @@ namespace detail
 {
   //! 式に適用できる反復子の型を返す
   /*!
-    E, const E&, E&, E&&型の x に begin() が
+    E, const E&, E&, E&&型の x に TU::begin() が
     適用できるかチェックし，可能な場合はその型を返す．
   */
   template <class E>
-  auto	iterator_t(E&& x) -> decltype(begin(x))				;
+  auto	iterator_t(E&& x) -> decltype(TU::begin(x))			;
   void	iterator_t(...)							;
 }	// namespace detail
 
