@@ -75,9 +75,15 @@ namespace detail
 {
   //! 式に適用できる反復子の型を返す
   /*!
-    E, const E&, E&, E&&型の x に std::begin(), TU::begin() 等がADLを用いて
-    適用できるかチェックし，可能な場合はその型を返す．
+    E, const E&, E&, E&&型の x に std::begin(), TU::begin(). TU::cu::begin()
+    等が適用できるかチェックし，可能な場合はその型を返す．
   */
+  // TU::begin(std::tuple<T...>&) は，本関数より前に定義することによって
+  // 候補関数になる．
+  // 
+  // TU::begin(TU::range<ITER, SIZE>&),
+  // cuda::std::begin(cuda::std::tuple<T...>&),
+  // TU::cu::begin(TU::cu::matNx<T, C>&) は，ADLによって候補関数になる．
   template <class E>
   auto	iterator_t(E&& x) -> decltype(begin(x))				;
   void	iterator_t(...)							;

@@ -927,14 +927,14 @@ evaluate(const E& expr)
 /************************************************************************
 *  substantiation of opnodes and ranges					*
 ************************************************************************/
-//! std::begin() が適用できるあらゆる式の評価結果を返す
+//! begin() が適用できるあらゆる式の評価結果を返す
 /*!
   range<ITER, SIZE> も評価される．結果は，参照ではなく値で返される．
   \param expr	式
-  \return	std::begin() がexprに適用可能な場合，その評価結果である配列を返す.
-		std::begin() がexprに適用可能でない場合，exprの値をそのまま返す.
+  \return	begin() がexprに適用可能な場合，その評価結果である配列を返す.
+		begin() がexprに適用可能でない場合，exprの値をそのまま返す.
 */
-template <class E> inline std::enable_if_t<!detail::has_stdbegin<E>::value, E>
+template <class E> inline std::enable_if_t<!has_begin<E>::value, E>
 substantiate(const E& expr)
 {
     return expr;
@@ -942,8 +942,8 @@ substantiate(const E& expr)
     
 template <class E> inline auto
 substantiate(const E& expr)
-    -> decltype(make_array<size0<E>()>(substantiate(*std::begin(expr)),
-				       std::begin(expr)))
+    -> decltype(make_array<size0<E>()>(substantiate(*begin(expr)),
+				       begin(expr)))
 {
     return {expr};
 }
