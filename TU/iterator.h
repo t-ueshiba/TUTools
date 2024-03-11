@@ -13,30 +13,6 @@
 namespace TU
 {
 /************************************************************************
-*  type aliases								*
-************************************************************************/
-//! 反復子が指す型
-template <class ITER>
-using iterator_value	  = typename std::iterator_traits<ITER>::value_type;
-
-//! 反復子が指す型への参照
-template <class ITER>
-using iterator_reference  = typename std::iterator_traits<ITER>::reference;
-
-//! 反復子が指す型へのポインタ
-template <class ITER>
-using iterator_pointer	  = typename std::iterator_traits<ITER>::pointer;
-    
-//! 2つの反復子間の差を表す型
-template <class ITER>
-using iterator_difference = typename std::iterator_traits<ITER>
-					::difference_type;
-//! 反復子のカテゴリ
-template <class ITER>
-using iterator_category	  = typename std::iterator_traits<ITER>
-					::iterator_category;
-
-/************************************************************************
 *  TU::[begin|end|rbegin|rend](T&&)					*
 ************************************************************************/
 /*
@@ -67,6 +43,142 @@ rend(T&& x) -> decltype(std::rend(x))
     return std::rend(x);
 }
 
+/************************************************************************
+*  type aliases								*
+************************************************************************/
+//! 反復子が指す型
+template <class ITER>
+using iterator_value	  = typename std::iterator_traits<ITER>::value_type;
+
+//! 反復子が指す型への参照
+template <class ITER>
+using iterator_reference  = typename std::iterator_traits<ITER>::reference;
+
+//! 反復子が指す型へのポインタ
+template <class ITER>
+using iterator_pointer	  = typename std::iterator_traits<ITER>::pointer;
+    
+//! 2つの反復子間の差を表す型
+template <class ITER>
+using iterator_difference = typename std::iterator_traits<ITER>
+					::difference_type;
+//! 反復子のカテゴリ
+template <class ITER>
+using iterator_category	  = typename std::iterator_traits<ITER>
+					::iterator_category;
+
+/************************************************************************
+*  type aliases: iterator_t<E>, reverse_iterator_t<E>, value_t<E>	*
+*		 element_t<E>, const_iterator_t<ITER>			*
+************************************************************************/
+namespace detail
+{
+  //! 式に適用できる反復子の型を返す
+  /*!
+    E, const E&, E&, E&&型の x に std::begin(), TU::begin() 等がADLを用いて
+    適用できるかチェックし，可能な場合はその型を返す．
+  */
+  template <class E>
+  auto	iterator_t(E&& x) -> decltype(begin(x))				;
+  void	iterator_t(...)							;
+}	// namespace detail
+
+//! 式に適用できる反復子の型を返す
+/*!
+  \param E	式またはそれへの参照の型
+  \return	E に反復子が適用できればその型，適用できなければ void
+*/
+template <class E>
+using iterator_t = decltype(detail::iterator_t(std::declval<E>()));
+
+//! 式に反復子が適用できるか判定する
+/*!
+  \param E	式またはそれへの参照の型
+  \return	E に反復子が適用できれば std::true_type，
+		適用できなければ std::false_type
+*/
+template <class E>
+using has_begin = std::negation<std::is_void<iterator_t<E> > >;
+    
+//! 反復子が指す式に適用できる反復子の型を返す
+/*!
+  \param ITER	反復子
+  \return	ITER が指す式に反復子が適用できればその型，適用できなければ void
+*/
+template <class ITER>
+using iterator_iterator = iterator_t<iterator_value<ITER> >;
+
+//! 式が持つ逆反復子の型を返す
+/*!
+  反復子を持たない式を与えると(iterator_t<E>がvoidになるので)コンパイルエラーとなる.
+  \param E	式またはそれへの参照の型
+  \return	E が持つ逆反復子の型
+*/
+template <class E>
+using reverse_iterator_t = std::reverse_iterator<iterator_t<E> >;
+
+//! 式が持つ反復子が指す型を返す
+/*!
+  反復子を持たない式を与えると(iterator_t<E>がvoidになるので)コンパイルエラーとなる.
+  \param E	反復子を持つ式またはそれへの参照の型
+  \return	E の反復子が指す型
+*/
+template <class E>
+using value_t	= iterator_value<iterator_t<E> >;
+
+namespace detail
+{
+  template <class T>
+  struct identity
+  {
+      using type = T;
+  };
+
+  template <class E, class=TU::iterator_t<E> >
+  struct element_t
+  {
+      using type = typename element_t<value_t<E> >::type;
+  };
+  template <class E>
+  struct element_t<E, void> : identity<E>				{};
+}	// namespace detail
+    
+//! 式が持つ反復子が指す型を再帰的に辿って到達する型を返す
+/*!
+  \param E	式またはそれへの参照の型
+  \return	E が反復子を持てばそれが指す型を再帰的に辿って到達する型，
+		持たなければ E 自身
+*/
+template <class E>
+using element_t	= typename detail::element_t<E>::type;
+
+namespace detail
+{
+  template <class ITER>
+  struct const_iterator_t
+  {
+      using type = ITER;
+  };
+  template <class T>
+  struct const_iterator_t<T*>
+  {
+      using type = const T*;
+  };
+  template <class... ITER>
+  struct const_iterator_t<std::tuple<ITER...> >
+  {
+      using type = std::tuple<typename const_iterator_t<ITER>::type...>;
+  };
+}	// namespace detail
+
+//! 与えられた反復子のconstバージョンを返す
+/*!
+  \param ITER	反復子の型
+  \return	ITER のconstバージョン
+*/
+template <class ITER>
+using const_iterator_t = typename detail::const_iterator_t<ITER>::type;
+    
 /************************************************************************
 *  map_iterator<FUNC, ITER>						*
 ************************************************************************/
