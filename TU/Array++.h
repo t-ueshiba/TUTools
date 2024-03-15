@@ -934,7 +934,7 @@ evaluate(const E& expr)
   \return	begin() がexprに適用可能な場合，その評価結果である配列を返す.
 		begin() がexprに適用可能でない場合，exprの値をそのまま返す.
 */
-template <class E> inline std::enable_if_t<!has_begin<E>::value, E>
+template <class E> inline std::enable_if_t<!is_iterable<E>::value, E>
 substantiate(const E& expr)
 {
     return expr;

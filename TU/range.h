@@ -22,13 +22,15 @@ namespace TU
   \return	式の次元数
 */
 template <class E>
-constexpr std::enable_if_t<!has_begin<E>::value || is_tuple<E>::value, size_t>
+constexpr std::enable_if_t<!is_iterable<E>::value || is_tuple<E>::value,
+			   size_t>
 rank()
 {
     return 0;
 }
 template <class E>
-constexpr std::enable_if_t<has_begin<E>::value && !is_tuple<E>::value, size_t>
+constexpr std::enable_if_t<is_iterable<E>::value && !is_tuple<E>::value,
+			   size_t>
 rank()
 {
     return 1 + rank<value_t<E> >();

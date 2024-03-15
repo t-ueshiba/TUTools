@@ -96,15 +96,6 @@ namespace detail
 template <class E>
 using iterator_t = decltype(detail::iterator_t(std::declval<E>()));
 
-//! 式に反復子が適用できるか判定する
-/*!
-  \param E	式またはそれへの参照の型
-  \return	E に反復子が適用できれば std::true_type，
-		適用できなければ std::false_type
-*/
-template <class E>
-using has_begin = std::negation<std::is_void<iterator_t<E> > >;
-    
 //! 反復子が指す式に適用できる反復子の型を返す
 /*!
   \param ITER	反復子
