@@ -81,5 +81,17 @@ namespace detail
 template <class... T>
 using void_t = typename detail::void_t<T...>::type;
     
+/************************************************************************
+*  is_iterable<T>							*
+************************************************************************/
+namespace detail
+{
+  template <class T>
+  auto	is_iterable(const T& x) -> decltype(begin(x), std::true_type())	;
+  auto	is_iterable(...)	-> std::false_type			;
+}	// namespace detail
+template <class T>
+using is_iterable = decltype(detail::is_iterable(std::declval<T>()));
+
 }	// namespace TU
 #endif	// !TU_TYPE_TRAITS_H

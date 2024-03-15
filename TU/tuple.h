@@ -582,18 +582,8 @@ make_zip_iterator(const ITER& iter, const ITERS&... iters)
 /************************************************************************
 *  TU::[begin|end|rbegin|rend|size](TUPLE&&)				*
 ************************************************************************/
-namespace detail
-{
-  template <class T>
-  auto	check_begin(const T& x) -> decltype(begin(x), std::true_type())	;
-  auto	check_begin(...)	-> std::false_type			;
-
-  template <class T>
-  using has_begin = decltype(check_begin(std::declval<T>()));
-}	// namespace detail
-
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 begin(std::tuple<T...>& t)
 {
@@ -603,7 +593,7 @@ begin(std::tuple<T...>& t)
 }
 
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 end(std::tuple<T...>& t)
 {
@@ -625,7 +615,7 @@ rend(std::tuple<T...>& t) -> decltype(std::make_reverse_iterator(begin(t)))
 }
 
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 begin(std::tuple<T...>&& t)
 {
@@ -635,7 +625,7 @@ begin(std::tuple<T...>&& t)
 }
 
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 end(std::tuple<T...>&& t)
 {
@@ -657,7 +647,7 @@ rend(std::tuple<T...>&& t) -> decltype(std::make_reverse_iterator(begin(t)))
 }
 
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 begin(const std::tuple<T...>& t)
 {
@@ -667,7 +657,7 @@ begin(const std::tuple<T...>& t)
 }
 
 template <class... T,
-	  std::enable_if_t<all<detail::has_begin, T...>::value>* = nullptr>
+	  std::enable_if_t<all<is_iterable, T...>::value>* = nullptr>
 inline auto
 end(const std::tuple<T...>& t)
 {
