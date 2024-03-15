@@ -68,24 +68,6 @@ template <class S, class T>
 using replace_element = typename detail::replace_element<S, T>::type;
 
 /************************************************************************
-*  make_reference_wrapper(T&&)						*
-************************************************************************/
-//! 与えられた値の型に応じて実引数を生成する
-/*!
-  \param x	関数に渡す引数
-  \return	xが右辺値参照ならばx自身，定数参照ならばstd::cref(x),
-		非定数参照ならばstd::ref(x)
-*/
-template <class T>
-inline std::conditional_t<std::is_lvalue_reference<T>::value,
-			  std::reference_wrapper<std::remove_reference_t<T> >,
-			  T&&>
-make_reference_wrapper(T&& x)
-{
-    return std::forward<T>(x);
-}
-    
-/************************************************************************
 *  tuple_for_each(FUNC, TUPLES&&...)				`	*
 ************************************************************************/
 namespace detail
@@ -158,6 +140,20 @@ tuple_for_each(FUNC&& f, TUPLES&&... x)
 ************************************************************************/
 namespace detail
 {
+  //! 与えられた値の型に応じて実引数を生成する
+  /*!
+    \param x	関数に渡す引数
+    \return	xが右辺値参照ならばx自身，定数参照ならばstd::cref(x),
+		非定数参照ならばstd::ref(x)
+  */
+  template <class T> inline
+  std::conditional_t<std::is_lvalue_reference<T>::value,
+		     std::reference_wrapper<std::remove_reference_t<T> >, T&&>
+  make_reference_wrapper(T&& x)
+  {
+      return std::forward<T>(x);
+  }
+    
   template <class FUNC, class... TUPLES> inline auto
   tuple_transform(std::index_sequence<>, FUNC&&, TUPLES&&...)
   {

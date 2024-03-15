@@ -807,8 +807,7 @@ template <class ITER, class... SS> inline auto
 make_range_iterator(ITER iter,
 		    iterator_stride<ITER> stride, size_t size, SS... ss)
 {
-    return make_range_iterator(make_range_iterator(iter, ss...),
-			       stride, size);
+    return make_range_iterator(make_range_iterator(iter, ss...), stride, size);
 }
 
 template <class ITER, class... SS> inline auto
