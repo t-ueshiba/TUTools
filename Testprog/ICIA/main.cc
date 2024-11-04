@@ -70,7 +70,7 @@ main(int argc, char* argv[])
     const double	DegToRad = M_PI / 180.0;
     enum Algorithm	{PROJECTIVE, AFFINE, RIGID};
     Algorithm		algorithm = PROJECTIVE;
-    double		du = 0.0, dv = 0.0, theta = 0.0;
+    double		du = 3.0, dv = -2.0, theta = DegToRad * 3.0;
     T			thresh = 15.0;
     bool		newton = false;
     size_t		u0 = 0, v0 = 0;
