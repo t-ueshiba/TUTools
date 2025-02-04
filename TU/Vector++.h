@@ -936,19 +936,17 @@ TriDiagonal<T>::TriDiagonal(const E_& a)
 template <class T> void
 TriDiagonal<T>::diagonalize(bool abs)
 {
-    using namespace	std;
-
     for (size_t n = size(); n-- > 0; )
     {
 	int	niter = 0;
 
 #ifdef TU_DEBUG
-	cerr << "******** n = " << n << " ********" << endl;
+	std::cerr << "******** n = " << n << " ********" << std::endl;
 #endif
 	while (!off_diagonal_is_zero(n))
 	{					// n > 0 here
 	    if (niter++ > NITER_MAX)
-		throw runtime_error("TU::TriDiagonal::diagonalize(): Number of iteration exceeded maximum value!!");
+		throw std::runtime_error("TU::TriDiagonal::diagonalize(): Number of iteration exceeded maximum value!!");
 
 	  /* Find first m (< n) whose off-diagonal element is 0 */
 	    size_t	m = n;
@@ -983,7 +981,7 @@ TriDiagonal<T>::diagonalize(bool abs)
 		}
 	    }
 #ifdef TU_DEBUG
-	    cerr << "  niter = " << niter << ": " << off_diagonal();
+	    std::cerr << "  niter = " << niter << ": " << off_diagonal();
 #endif
 	}
     }
@@ -996,7 +994,7 @@ TriDiagonal<T>::diagonalize(bool abs)
 		if (std::fabs(_diagonal[n]) >
 		    std::fabs(_diagonal[m]))			// abs. values
 		{
-		    swap(_diagonal[m], _diagonal[n]);
+		    std::swap(_diagonal[m], _diagonal[n]);
 		    for (size_t j = 0; j < size(); ++j)
 		    {
 			const T	tmp = _Ut[m][j];
@@ -1011,7 +1009,7 @@ TriDiagonal<T>::diagonalize(bool abs)
 	    for (size_t n = m+1; n < size(); ++n)
 		if (_diagonal[n] > _diagonal[m])		// raw values
 		{
-		    swap(_diagonal[m], _diagonal[n]);
+		    std::swap(_diagonal[m], _diagonal[n]);
 		    for (size_t j = 0; j < size(); ++j)
 		    {
 			const T	tmp = _Ut[m][j];
@@ -1226,19 +1224,17 @@ BiDiagonal<T>::BiDiagonal(const E& a)
 template <class T> void
 BiDiagonal<T>::diagonalize()
 {
-    using namespace	std;
-
     for (size_t n = _Et.size(); n-- > 0; )
     {
 	size_t	niter = 0;
 
 #ifdef TU_DEBUG
-	cerr << "******** n = " << n << " ********" << endl;
+	std::cerr << "******** n = " << n << " ********" << std::endl;
 #endif
 	while (!off_diagonal_is_zero(n))	// n > 0 here
 	{
 	    if (niter++ > NITER_MAX)
-		throw runtime_error("TU::BiDiagonal::diagonalize(): Number of iteration exceeded maximum value");
+		throw std::runtime_error("TU::BiDiagonal::diagonalize(): Number of iteration exceeded maximum value");
 
 	  /* Find first m (< n) whose off-diagonal element is 0 */
 	    size_t m = n;
@@ -1273,10 +1269,10 @@ BiDiagonal<T>::diagonalize()
 	    T	x, y;
 	    initialize_rotation(m, n, x, y);
 #ifdef TU_DEBUG
-	    cerr << "--- m = " << m << ", n = " << n << "---"
-		 << endl;
-	    cerr << "  diagonal:     " << diagonal();
-	    cerr << "  off-diagonal: " << off_diagonal();
+	    std::cerr << "--- m = " << m << ", n = " << n << "---"
+		      << std::endl;
+	    std::cerr << "  diagonal:     " << diagonal();
+	    std::cerr << "  off-diagonal: " << off_diagonal();
 #endif
 	  /* Apply rotation P(i-1, i) for each i (i = m+1, n+2, ... , n) */
 	    for (size_t i = m; ++i <= n; )
@@ -1320,7 +1316,7 @@ BiDiagonal<T>::diagonalize()
 		}
 	    }
 #ifdef TU_DEBUG
-	    cerr << "  niter = " << niter << ": " << off_diagonal();
+	    std::cerr << "  niter = " << niter << ": " << off_diagonal();
 #endif
 	}
     }
@@ -1329,7 +1325,7 @@ BiDiagonal<T>::diagonalize()
 	for (size_t n = m+1; n < _Et.size(); ++n)
 	    if (std::fabs(_diagonal[n]) > std::fabs(_diagonal[m]))
 	    {
-		swap(_diagonal[m], _diagonal[n]);
+		std::swap(_diagonal[m], _diagonal[n]);
 		for (size_t j = 0; j < _Et.size(); ++j)
 		{
 		    const T	tmp = _Et[m][j];

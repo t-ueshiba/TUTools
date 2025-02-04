@@ -21,7 +21,8 @@ MatchImage::copy(const Image<u_char>& image, size_t u0, size_t v0)
 MatchImage&
 MatchImage::drawLine(const Point2i& p, const Point2i& q, bool green)
 {
-    using namespace	std;
+    using	std::abs;
+    using	std::swap;
 
     if (p == q)		// Line of zero length.
 	return *this;

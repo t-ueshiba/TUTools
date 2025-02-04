@@ -130,6 +130,10 @@ class Buf : public BufTraits<T, ALLOC>
 			throw std::logic_error("Buf<T, ALLOC, SIZE, SIZES...>::resize(): mismatched size!");
 		    return false;
 		}
+    void	swap(Buf& buf)
+		{
+		    _a.swap(buf._a);
+		}
 
     template <size_t I_=0>
     constexpr static auto	size()
@@ -322,6 +326,16 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 		    _p	      = alloc(_capacity);
 
 		    return true;
+		}
+    void	swap(Buf& buf)
+		{
+		    using std::swap;
+
+		    _sizes.swap(buf._sizes);
+		    swap(_stride, buf._stride);
+		    swap(_capacity, buf._capacity);
+		    swap(_ext, buf._ext);
+		    swap(_p, buf._p);
 		}
 
   // 外部記憶領域および各軸のサイズと最終軸のストライドを指定したコンストラクタと
@@ -672,7 +686,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 		{
 		    super::resize(p, {to_size(sizes)...}, alignment);
 		}
-	    
+
     template <class T_> std::enable_if_t<TU::rank<T_>() == 0, array&>
 		operator =(const T_& c)
 		{
@@ -811,6 +825,17 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 			save(out, begin->begin(), begin->size());
 		}
 };
+
+//! 2つの多次元配列の内容を交換する
+/*!
+  \param a	多次元配列
+  \param b	多次元配列
+ */
+template <class T, class ALLOC, size_t SIZE, size_t... SIZES> void
+swap(array<T, ALLOC, SIZE, SIZES...>& a, array<T, ALLOC, SIZE, SIZES...>& b)
+{
+    a.swap(b);
+}
 
 //! 多次元配列の指定された軸の要素数を返す
 /*!

@@ -164,8 +164,6 @@ BSplineKnots<T>::basis(element_type u, size_t& I) const
 template <class T> typename BSplineKnots<T>::knot_array2
 BSplineKnots<T>::derivatives(element_type u, size_t K, size_t& I) const
 {
-    using namespace	std;
-    
     I = findSpan(u);
     
     knot_array2	ndu(degree()+1, degree()+1);
@@ -197,14 +195,15 @@ BSplineKnots<T>::derivatives(element_type u, size_t K, size_t& I) const
 	for (size_t k = 1; k <= K; ++k)			// k-th derivative
 	{
 	    N[k][i] = 0.0;
-	    for (size_t j = k - min(k, i); j <= min(k, degree()-i); ++j)
+	    for (size_t j = k - std::min(k, i); j <= std::min(k, degree()-i);
+		 ++j)
 	    {
 		a[current][j] = ((j != k ? a[previous][j]   : 0.0) -
 				 (j != 0 ? a[previous][j-1] : 0.0))
 			      / ndu[i-k+j][degree()-k+1];
 		N[k][i] += a[current][j] * ndu[degree()-k][i-k+j];
 	    }
-	    swap(current, previous);
+	    std::swap(current, previous);
 	}
     }
 
@@ -339,10 +338,8 @@ BSplineCurve<C>::operator ()(element_type u) const
 template <class C> typename BSplineCurve<C>::coord_array
 BSplineCurve<C>::derivatives(element_type u, size_t K) const
 {
-    using namespace	std;
-    
     size_t	I;
-    knot_array2	dN = _knots.derivatives(u, min(K,degree()), I);
+    knot_array2	dN = _knots.derivatives(u, std::min(K,degree()), I);
     coord_array	ders(K+1);
     for (size_t k = 0; k < dN.nrow(); ++k)
 	for (size_t i = 0; i <= degree(); ++i)
@@ -603,8 +600,6 @@ BSplineSurface<C>::operator ()(element_type u, element_type v) const
 template <class C> typename BSplineSurface<C>::coord_array2
 BSplineSurface<C>::derivatives(element_type u, element_type v, size_t D) const
 {
-    using namespace	std;
-    
     size_t		I, J;
     knot_array2		udN = _uKnots.derivatives(u, min(D,uDegree()), I),
 			vdN = _vKnots.derivatives(v, min(D,vDegree()), J);
@@ -615,7 +610,8 @@ BSplineSurface<C>::derivatives(element_type u, element_type v, size_t D) const
 	for (size_t j = 0; j <= vDegree(); ++j)
 	    for (size_t i = 0; i <= uDegree(); ++i)
 		tmp[j] += udN[k][i] * _c[J-vDegree()+j][I-uDegree()+i];
-	for (size_t l = 0; l < min(vdN.nrow(), D-k); ++l)// derivatives w.r.t v
+	for (size_t l = 0;
+	     l < std::min(vdN.nrow(), D-k); ++l)	// derivatives w.r.t v
 	    for (size_t j = 0; j <= vDegree(); ++j)
 		ders[l][k] += vdN[l][j] * tmp[j];
     }
