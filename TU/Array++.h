@@ -42,7 +42,7 @@ class BufTraits : public std::allocator_traits<ALLOC>
   protected:
     using			typename super::pointer;
     using			typename super::allocator_type;
-    
+
     constexpr static size_t	Alignment = align<allocator_type>(nullptr);
 
     static pointer	null()		{ return static_cast<T*>(nullptr); }
@@ -71,7 +71,7 @@ class Buf : public BufTraits<T, ALLOC>
     constexpr static size_t	Unit = (super::Alignment ?
 					lcm(sizeof(T),
 					    super::Alignment)/sizeof(T) : 1);
-    
+
   // このバッファの総容量をコンパイル時に計算
     constexpr static size_t	cap(size_t size)
 				{
@@ -97,7 +97,7 @@ class Buf : public BufTraits<T, ALLOC>
 
     template <size_t I_>
     using axis			= std::integral_constant<size_t, I_>;
-    
+
   public:
     constexpr static size_t	rank()	{ return 1 + sizeof...(SIZES); }
 
@@ -116,7 +116,7 @@ class Buf : public BufTraits<T, ALLOC>
     Buf&	operator =(const Buf&)		= default;
    		Buf(Buf&&)			= default;
     Buf&	operator =(Buf&&)		= default;
-    
+
   // 各軸のサイズと最終軸のストライドを指定したコンストラクタとリサイズ関数
     explicit	Buf(const sizes_type& sizes, size_t=0)
 		{
@@ -144,7 +144,7 @@ class Buf : public BufTraits<T, ALLOC>
     constexpr static auto	nrow()		{ return size<0>(); }
     constexpr static auto	ncol()		{ return size<1>(); }
     constexpr static auto	capacity()	{ return cap(SIZE, SIZES...); }
-    
+
     auto	data()				{ return _a.data(); }
     auto	data()			const	{ return _a.data(); }
     auto	begin()
@@ -183,7 +183,7 @@ class Buf : public BufTraits<T, ALLOC>
    		{
    		    return a._a != b._a;
    		}
-    
+
   private:
     void	init(std::true_type)		{ _a.fill(0); }
     void	init(std::false_type)		{}
@@ -204,7 +204,7 @@ class Buf : public BufTraits<T, ALLOC>
 		{
 		    return (rank() == 1 ? size() : capacity());
 		}
-    
+
     template <class ITER_>
     static auto	make_iterator(ITER_ iter)
 		{
@@ -258,13 +258,15 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
   public:
   // 標準コンストラクタ/代入演算子およびデストラクタ
 		Buf()
-		    :_stride(0), _capacity(0), _ext(false), _p(super::null())
+		    :_sizes(), _stride(0), _capacity(0), _allocator(),
+		     _ext(false), _p(super::null())
 		{
 		    _sizes.fill(0);
 		}
 		Buf(const Buf& b)
 		    :_sizes(b._sizes), _stride(b._stride),
-		     _capacity(b._capacity), _ext(false), _p(alloc(_capacity))
+		     _capacity(b._capacity), _allocator(),
+		     _ext(false), _p(alloc(_capacity))
 		{
 		    copy<0>(b.begin(), size(), begin());
 		}
@@ -279,19 +281,21 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 		}
 		Buf(Buf&& b) noexcept
 		    :_sizes(b._sizes), _stride(b._stride),
-		     _capacity(b._capacity), _ext(b._ext), _p(b._p)
+		     _capacity(b._capacity), _allocator(),
+		     _ext(b._ext), _p(b._p)
 		{
 		  // b の 破壊時に this->_p がdeleteされることを防ぐ．
 		    b._p = super::null();
 		}
     Buf&	operator =(Buf&& b) noexcept
 		{
-		    _sizes    = b._sizes;
-		    _stride   = b._stride;
-		    _capacity = b._capacity;
-		    _ext      = b._ext;
-		    _p        = b._p;
-		    
+		    _sizes     = b._sizes;
+		    _stride    = b._stride;
+		    _capacity  = b._capacity;
+		    _allocator = b._allocator;
+		    _ext       = b._ext;
+		    _p         = b._p;
+
 		  // b の 破壊時に this->_p がdeleteされることを防ぐ．
 		    b._p = super::null();
 
@@ -307,6 +311,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 		    :_sizes(sizes),
 		     _stride(to_stride(alignment, _sizes[rank()-1])),
 		     _capacity(capacity_of(axis<0>())),
+		     _allocator(),
 		     _ext(false),
 		     _p(alloc(_capacity))
 		{
@@ -314,7 +319,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
     bool	resize(const sizes_type& sizes, size_t alignment)
 		{
 		    const auto	stride = to_stride(alignment, sizes[rank()-1]);
-		    
+
 		    if ((stride == _stride) && (sizes == _sizes))
 			return false;
 
@@ -334,6 +339,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 		    _sizes.swap(buf._sizes);
 		    swap(_stride, buf._stride);
 		    swap(_capacity, buf._capacity);
+		    swap(_allocator, buf._allocator);
 		    swap(_ext, buf._ext);
 		    swap(_p, buf._p);
 		}
@@ -396,7 +402,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 
 		    return in;
 		}
-    
+
   private:
     static ptrdiff_t
 		to_stride(size_t alignment, size_t size)
@@ -432,7 +438,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 		{
 		    return capacity();
 		}
-    
+
     pointer	alloc(size_t siz)
 		{
 		    const auto	p = super::allocate(_allocator, siz);
@@ -475,15 +481,15 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 					tmp(new value_type[BufSiz]);
 		    base_iterator	iter;
 		    size_t		n = 0;
-		    
+
 		    for (size_t d = rank() - 1; n < BufSiz; )
 		    {
 			char	c;
-			
+
 			while (in.get(c))
 			    if (!isspace(c) || c == '\n')
 				break;
-			
+
 			if (in && c != '\n')	// 現在軸の末尾でなければ...
 			{
 			    in.putback(c);	// 1文字読み戻して
@@ -503,7 +509,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
 				iter = base_iterator(_p + span(is_1d()));
 				break;		// その末端をiterにセットして返す
 			    }
-		
+
 			    nvalues[d] = 0;	// 現在軸を先頭に戻し
 			    ++nvalues[--d];	// 直上軸に移動して1つ進める
 			}
@@ -526,7 +532,7 @@ class Buf<T, ALLOC, 0, SIZES...> : public BufTraits<T, ALLOC>
     bool		_ext;		//!< _p が外部記憶領域なら true
     pointer		_p;		//!< 先頭要素へのポインタ
 };
-    
+
 /************************************************************************
 *  class array<T, ALLOC, SIZE, SIZES...>				*
 ************************************************************************/
@@ -542,7 +548,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 {
   private:
     using super	= Buf<T, ALLOC, SIZE, SIZES...>;
-    
+
   public:
     using typename super::sizes_type;
     using typename super::pointer;
@@ -557,7 +563,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
     using const_value_type	 = iterator_value<const_iterator>;
     using reference		 = iterator_reference<iterator>;
     using const_reference	 = iterator_reference<const_iterator>;
-    
+
   public:
 		array()				= default;
 		array(const array&)		= default;
@@ -590,7 +596,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 		{
 		    return super::resize({to_size(sizes)...}, super::Alignment);
 		}
-    
+
     template <class... SIZES_,
 	      std::enable_if_t<
 		  sizeof...(SIZES_) == rank() &&
@@ -625,7 +631,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 		operator =(const E_& expr)
 		{
 		    using	TU::begin;
-		    
+
 		    super::resize(sizes(expr,
 					std::make_index_sequence<rank()>()),
 				  super::Alignment);
@@ -669,7 +675,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 		{
 		    super::resize(p, {to_size(sizes)...}, super::Alignment);
 		}
-	    
+
     template <class... SIZES_,
 	      std::enable_if_t<
 		  sizeof...(SIZES_) == rank() &&
@@ -760,10 +766,10 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 			out << ' ' << val;
 		    return out;
 		}
-    
+
   private:
     using	sizes_iterator = typename sizes_type::iterator;
-    
+
     template <class T_>
     static std::enable_if_t<std::is_integral<T_>::value, size_t>
 		to_size(const T_& arg)
@@ -800,7 +806,7 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 
 		    return sizs;
 		}
-    
+
     static void	restore(std::istream& in, pointer begin, size_t n)
 		{
 		    in.read(reinterpret_cast<char*>(begin),
@@ -862,7 +868,7 @@ operator <<(std::ostream& out, const array<T, ALLOC, SIZE, SIZES...>& a)
 {
     return a.put(out) << std::endl;
 }
-    
+
 //! 入力ストリームから配列を読み込む(ASCII)．
 /*!
   \param in	入力ストリーム
@@ -912,13 +918,13 @@ namespace detail
       using type = array<U, ALLOC<U>, SIZE, SIZES...>;
   };
 }	// namespace detail
-    
+
 /************************************************************************
 *  evaluation of opnodes						*
 ************************************************************************/
 template <size_t SIZE, class T, class ITER> array<T, std::allocator<T>, SIZE>
 make_array(const T&, ITER)						;
-    
+
 template <size_t SIZE,
 	  class T, class ALLOC, size_t SIZE1, size_t... SIZES, class ITER>
 array<T, ALLOC, (SIZE1 ? SIZE : 0), SIZE1, SIZES...>
@@ -964,7 +970,7 @@ substantiate(const E& expr)
 {
     return expr;
 }
-    
+
 template <class E> inline auto
 substantiate(const E& expr)
     -> decltype(make_array<size0<E>()>(substantiate(*begin(expr)),
@@ -1046,7 +1052,7 @@ namespace detail
       auto	begin()	const
 		{
 		    using	TU::begin;
-		    
+
 		  // map_iterator への第1テンプレートパラメータを，
 		  // binder2nd そのものではなく，それへの定数参照とする
 		  // ことにより，キャッシュのコピーを防ぐ
@@ -1055,13 +1061,13 @@ namespace detail
       auto	end() const
 		{
 		    using	TU::end;
-		    
+
 		    return make_map_iterator(std::cref(_binder), end(_l));
 		}
       auto	size() const
 		{
 		    using	std::size;
-		    
+
 		    return size(_l);
 		}
       decltype(auto)
@@ -1090,17 +1096,17 @@ namespace detail
       using	cache_t = decltype(substantiate(
 				       *std::cbegin(std::declval<L>()) *
 				       *std::cbegin(std::declval<R>())));
-      
+
     public:
 		lincomb_opnode(L&& l, R&& r)
 		    :_l(std::forward<L>(l)), _r(std::forward<R>(r)),
 		     _valid(false), _cache()
 		{
 		    using	std::size;
-		    
+
 		    assert(size(l) == size(r));
 		}
-      
+
       constexpr static auto
 		size0()
 		{
@@ -1131,10 +1137,10 @@ namespace detail
 		    if (!_valid)
 		    {
 			using	std::size;
-			
+
 			constexpr auto	N = max<TU::size0<L>(),
 						TU::size0<R>(), 1>::value - 1;
-			
+
 			auto	a = std::cbegin(_l);
 			auto	b = std::cbegin(_r);
 			_cache = *a * *b;
@@ -1146,7 +1152,7 @@ namespace detail
 
 		    return _cache;
 		}
-      
+
     private:
       const L		_l;		// rank<L>() == 1 である左辺
       const R		_r;		// rank<R>() == 2 である右辺
@@ -1178,7 +1184,7 @@ operator *(const L& l, const R& r)
 {
     using element_type = std::common_type_t<element_t<L>, element_t<R> >;
     using std::size;
-    
+
     assert(size<0>(l) == size<0>(r));
     constexpr size_t	S = detail::max<size0<L>(), size0<R>()>::value;
     return inner_product<S>(begin(l), size(l), begin(r), element_type(0));
@@ -1245,7 +1251,7 @@ operator *(L&& l, R&& r)
     return transpose(transpose(std::forward<R>(r)) *
 		     transpose(std::forward<L>(l)));
 }
-    
+
 //! 2つの1次元配列式の外積をとる.
 /*!
   \param l	左辺の1次元配列式
@@ -1281,7 +1287,7 @@ operator ^(const L& l, const R& r)
     std::cout << "operator ^ [" << print_sizes(l) << ']' << std::endl;
 #endif
     assert(size<0>(l) == 3 && size<0>(r) == 3);
-    
+
     const auto&	el = evaluate(l);
     const auto&	er = evaluate(r);
 
