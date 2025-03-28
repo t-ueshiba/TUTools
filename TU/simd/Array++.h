@@ -18,7 +18,7 @@ namespace TU
 namespace simd
 {
 template <size_t SIZE, class ITER, bool ALIGNED> auto
-make_array(iterator_reference<ITER> x, iterator_wrapper<ITER, ALIGNED> iter)
+make_array(std::iter_reference_t<ITER> x, iterator_wrapper<ITER, ALIGNED> iter)
     -> array<typename decltype(*make_accessor(iter))::element_type,
 	     simd::allocator<
 		 typename decltype(*make_accessor(iter))::element_type>,
@@ -88,7 +88,7 @@ inner_product(iterator_wrapper<ITER0, ALIGNED0> iter0, size_t n,
 				 iter0, n))
 	      << "]" << std::endl;
 #endif
-    constexpr auto	STEP = iterator_value<decltype(make_accessor(iter0))>
+    constexpr auto	STEP = std::iter_value_t<decltype(make_accessor(iter0))>
 				::size;
     
     return hadd(TU::inner_product<detail::nsteps(N, STEP)>(
@@ -107,7 +107,7 @@ inner_product(iterator_wrapper<ITER0, ALIGNED0> iter0, size_t n,
 template <size_t N, class ITER, bool ALIGNED> inline auto
 square(iterator_wrapper<ITER, ALIGNED> iter, size_t n)
 {
-    constexpr auto	STEP = iterator_value<decltype(make_accessor(iter))>
+    constexpr auto	STEP = std::iter_value_t<decltype(make_accessor(iter))>
 				::size;
     
     return hadd(square<detail::nsteps(N, STEP)>(make_accessor(iter),

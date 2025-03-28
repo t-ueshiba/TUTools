@@ -357,7 +357,7 @@ SADStereo<SCORE, DISP>::initializeDissimilarities(COL colL, COL colLe,
 						  COL_RV colRV,
 						  col_siterator colQ) const
 {
-    using pixel_t	= iterator_value<COL>;
+    using pixel_t	= std::iter_value_t<COL>;
     using diff_t	= Diff<pixel_t>;
 
     if (_params.blend > 0)
@@ -424,7 +424,7 @@ SADStereo<SCORE, DISP>::updateDissimilarities(COL colL,  COL colLe,
 					      COL colLp, COL_RV colRVp,
 					      col_siterator colQ) const
 {
-    using pixel_t	= iterator_value<COL>;
+    using pixel_t	= std::iter_value_t<COL>;
     using diff_t	= Diff<pixel_t>;
 
     if (_params.blend > 0)

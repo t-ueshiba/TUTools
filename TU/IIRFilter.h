@@ -25,7 +25,7 @@ class iir_filter_iterator
     : public boost::iterator_adaptor<iir_filter_iterator<D, FWD, COEFF, ITER>,
 				     ITER,
 				     replace_element<iterator_substance<ITER>,
-						     iterator_value<COEFF> >,
+						     std::iter_value_t<COEFF> >,
 				     boost::single_pass_traversal_tag>
 {
   private:
@@ -33,7 +33,7 @@ class iir_filter_iterator
 			iir_filter_iterator,
 			ITER,
 			replace_element<iterator_substance<ITER>,
-					iterator_value<COEFF> >,
+					std::iter_value_t<COEFF> >,
 			boost::single_pass_traversal_tag>;
     
   public:

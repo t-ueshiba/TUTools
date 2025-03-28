@@ -117,7 +117,7 @@ namespace detail
   template <class ITER>
   struct vsize_impl
   {
-      constexpr static auto	max = vsize_impl<iterator_value<ITER> >::max;
+      constexpr static auto	max = vsize_impl<std::iter_value_t<ITER> >::max;
   };
   template <class T>
   struct vsize_impl<vec<T> >
@@ -167,7 +167,7 @@ cvtup(vec<S> x)
 }
 
 template <class T, bool HI, bool MASK, size_t N, class ITER,
-	  std::enable_if_t<iterator_value<ITER>::size == N>* = nullptr>
+	  std::enable_if_t<std::iter_value_t<ITER>::size == N>* = nullptr>
 inline auto
 cvtup(ITER& iter)
 {
@@ -175,7 +175,7 @@ cvtup(ITER& iter)
 }
 
 template <class T, bool HI, bool MASK, size_t N, class ITER>
-inline std::enable_if_t<iterator_value<ITER>::size != N, ITER&>
+inline std::enable_if_t<std::iter_value_t<ITER>::size != N, ITER&>
 cvtup(ITER& iter)
 {
     return iter;
@@ -233,7 +233,7 @@ cvtdown(vec<S> x, vec<S> y)
 }
 
 template <class T, bool MASK, size_t N=vec<T>::size, class ITER,
-	  std::enable_if_t<tuple_head<iterator_value<ITER> >::size == N>*
+	  std::enable_if_t<tuple_head<std::iter_value_t<ITER> >::size == N>*
 	  = nullptr>
 inline auto
 cvtdown(ITER& iter)
@@ -242,7 +242,7 @@ cvtdown(ITER& iter)
 }
 
 template <class T, bool MASK, size_t N=vec<T>::size, class ITER,
-	  std::enable_if_t<(tuple_head<iterator_value<ITER> >::size < N)>*
+	  std::enable_if_t<(tuple_head<std::iter_value_t<ITER> >::size < N)>*
 			   = nullptr>
 inline auto
 cvtdown(ITER& iter)

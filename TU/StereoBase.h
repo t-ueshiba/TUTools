@@ -186,17 +186,17 @@ template <class ITER, class RV_ITER>
 class mask_iterator : public boost::iterator_adaptor<
 				 mask_iterator<ITER, RV_ITER>,
 				 ITER,
-				 replace_element<iterator_value<RV_ITER>, bool>,
+				 replace_element<std::iter_value_t<RV_ITER>, bool>,
 				 boost::single_pass_traversal_tag,
-				 replace_element<iterator_value<RV_ITER>, bool> >
+				 replace_element<std::iter_value_t<RV_ITER>, bool> >
 {
   private:
     using super		= boost::iterator_adaptor<
 			      mask_iterator,
 			      ITER,
-			      replace_element<iterator_value<RV_ITER>, bool>,
+			      replace_element<std::iter_value_t<RV_ITER>, bool>,
 			      boost::single_pass_traversal_tag,
-			      replace_element<iterator_value<RV_ITER>, bool> >;
+			      replace_element<std::iter_value_t<RV_ITER>, bool> >;
     using rv_type	= decayed_iterator_value<RV_ITER>;
     using element_type	= tuple_head<rv_type>;
     
@@ -329,13 +329,13 @@ namespace simd
 	    mask_iterator<ITER, RV_ITER>,
 	    ITER,
 	    replace_element<
-		iterator_value<RV_ITER>,
+		std::iter_value_t<RV_ITER>,
 		vec<mask_type<typename tuple_head<
 				  decayed_iterator_value<
 				      RV_ITER> >::element_type> > >,
 	    boost::single_pass_traversal_tag,
 	    replace_element<
-		iterator_value<RV_ITER>,
+		std::iter_value_t<RV_ITER>,
 		vec<mask_type<typename tuple_head<
 				  decayed_iterator_value<
 				      RV_ITER> >::element_type> > > >

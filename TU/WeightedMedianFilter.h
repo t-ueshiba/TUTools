@@ -459,14 +459,14 @@ class WeightedMedianFilter2 : public detail::WeightedMedianFilterBase<W>,
 					 ITER,
 					 boost::use_default,
 					 boost::use_default,
-					 iterator_value<ITER> >
+					 std::iter_value_t<ITER> >
     {
       private:
 	using super	= boost::iterator_adaptor<reverse_iterator,
 						  ITER,
 						  boost::use_default,
 						  boost::use_default,
-						  iterator_value<ITER> >;
+						  std::iter_value_t<ITER> >;
 
       public:
 	using		typename super::reference;

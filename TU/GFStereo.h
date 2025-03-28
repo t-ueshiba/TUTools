@@ -531,7 +531,7 @@ GFStereo<SCORE, DISP>::initializeFilterParameters(COL colL, COL colLe,
 						  col_siterator colQ,
 						  col_giterator colF) const
 {
-    using pixel_t	= iterator_value<COL>;
+    using pixel_t	= std::iter_value_t<COL>;
     using diff_t	= Diff<pixel_t>;
 
     if (_params.blend > 0)
@@ -616,7 +616,7 @@ GFStereo<SCORE, DISP>::updateFilterParameters(COL colL, COL colLe, COL_RV colRV,
 					      col_siterator colQ,
 					      col_giterator colF) const
 {
-    using pixel_t	= iterator_value<COL>;
+    using pixel_t	= std::iter_value_t<COL>;
     using diff_t	= Diff<pixel_t>;
 
     if (_params.blend > 0)

@@ -559,10 +559,10 @@ class array : public Buf<T, ALLOC, SIZE, SIZES...>
 					    ->begin());
     using reverse_iterator	 = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-    using value_type		 = iterator_value<iterator>;
-    using const_value_type	 = iterator_value<const_iterator>;
-    using reference		 = iterator_reference<iterator>;
-    using const_reference	 = iterator_reference<const_iterator>;
+    using value_type		 = std::iter_value_t<iterator>;
+    using const_value_type	 = std::iter_value_t<const_iterator>;
+    using reference		 = std::iter_reference_t<iterator>;
+    using const_reference	 = std::iter_reference_t<const_iterator>;
 
   public:
 		array()				= default;

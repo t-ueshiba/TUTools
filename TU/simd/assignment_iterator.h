@@ -159,7 +159,7 @@ class assignment_iterator
 		assignment_iterator<ARG, MASK, FUNC, ITER...>,
 		typename detail::assignment_proxy<ARG, MASK, FUNC, ITER...>
 			       ::iterator,
-		iterator_value<
+		std::iter_value_t<
 		    typename detail::assignment_proxy<ARG, MASK, FUNC, ITER...>
 				   ::iterator>,
 		boost::single_pass_traversal_tag,
@@ -170,7 +170,7 @@ class assignment_iterator
     using super	= boost::iterator_adaptor<
 			assignment_iterator,
 			typename proxy::iterator,
-			iterator_value<typename proxy::iterator>,
+			std::iter_value_t<typename proxy::iterator>,
 			boost::single_pass_traversal_tag,
 			proxy>;
     friend	class boost::iterator_core_access;

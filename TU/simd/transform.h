@@ -46,7 +46,8 @@ namespace detail
 	  using type = void;
       };
       
-      using E = typename vec_element<iterator_value<OUT> >::type;
+    //using E = typename vec_element<std::iter_value_t<OUT> >::type;
+      using E = typename vec_element<typename std::iterator_traits<OUT>::value_type>::type;
       
     //! 出力反復子に書き出すSIMDベクトルの要素型
       using O = std::conditional_t<std::is_void<E>::value, T, E>;

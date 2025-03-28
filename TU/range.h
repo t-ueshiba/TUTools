@@ -134,7 +134,7 @@ class sizes_holder
     template <class ITER_> constexpr
     static size_t	rank()
 			{
-			    using value_type = iterator_value<ITER_>;
+			    using value_type = std::iter_value_t<ITER_>;
 			    return TU::rank<value_type>();
 			}
     template <class ITER_>
@@ -251,7 +251,7 @@ template <class ITER, size_t SIZE=0>
 class range
 {
   public:
-    using value_type	 = iterator_value<ITER>;
+    using value_type	 = std::iter_value_t<ITER>;
     using const_iterator = const_iterator_t<ITER>;
     
   public:
@@ -343,7 +343,7 @@ template <class ITER>
 class range<ITER, 0>
 {
   public:
-    using value_type	 = iterator_value<ITER>;
+    using value_type	 = std::iter_value_t<ITER>;
     using const_iterator = const_iterator_t<ITER>;
     
   public:

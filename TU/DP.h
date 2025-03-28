@@ -22,9 +22,9 @@ template <class DOM, class T>
 class DP
 {
   public:
-    using argument_iterator	= typename iterator_value<DOM>::const_iterator;
-    using argument_type		= iterator_value<argument_iterator>;
-    using value_type		= T;
+    using argument_iterator = typename std::iter_value_t<DOM>::const_iterator;
+    using argument_type	    = std::iter_value_t<argument_iterator>;
+    using value_type	    = T;
 
   private:
     struct Node

@@ -194,7 +194,7 @@ template <class T>
 template <class PITER> typename QuantizerBase<T>::template BinProps<PITER>
 QuantizerBase<T>::BinProps<PITER>::split()
 {
-    using pair_type	= iterator_value<PITER>;
+    using pair_type	= std::iter_value_t<PITER>;
 
   // 要素への反復子の配列を作り，昇順にソート
     const u_char T::*	c = (_var[0] > _var[1] ?
@@ -279,14 +279,14 @@ class Quantizer : public QuantizerBase<T>
     
   public:
     template <class ITER>
-    std::enable_if_t<std::is_same<iterator_value<ITER>, u_char>::value,
+    std::enable_if_t<std::is_same<std::iter_value_t<ITER>, u_char>::value,
 		     range<ITER> >
 	operator ()(ITER ib, ITER ie, size_t)
 	{
 	    return range<ITER>(ib, std::distance(ib, ie));
 	}
     template <class ITER>
-    std::enable_if_t<!std::is_same<iterator_value<ITER>, u_char>::value,
+    std::enable_if_t<!std::is_same<std::iter_value_t<ITER>, u_char>::value,
 		     const Array<size_t>&>
 	operator ()(ITER ib, ITER ie, size_t nbins)			;
     friend std::ostream&
@@ -300,7 +300,7 @@ class Quantizer : public QuantizerBase<T>
 };
 
 template <class T> template <class ITER>
-std::enable_if_t<!std::is_same<iterator_value<ITER>, u_char>::value,
+std::enable_if_t<!std::is_same<std::iter_value_t<ITER>, u_char>::value,
 		 const Array<size_t>&>
 Quantizer<T>::operator ()(ITER ib, ITER ie, size_t nbins)
 {
@@ -328,14 +328,14 @@ class Quantizer2 : public QuantizerBase<T>
     
   public:
     template <class ROW>
-    std::enable_if_t<std::is_same<value_t<iterator_value<ROW> >,
+    std::enable_if_t<std::is_same<value_t<std::iter_value_t<ROW> >,
 				  u_char>::value, range<ROW> >
 	operator ()(ROW ib, ROW ie, size_t nbins)
 	{
 	    return range<ROW>(ib, std::distance(ib, ie));
 	}
     template <class ROW>
-    std::enable_if_t<!std::is_same<value_t<iterator_value<ROW> >,
+    std::enable_if_t<!std::is_same<value_t<std::iter_value_t<ROW> >,
 				   u_char>::value, const Array2<size_t>&>
 	operator ()(ROW ib, ROW ie, size_t nbins)			;
     friend std::ostream&
@@ -349,11 +349,12 @@ class Quantizer2 : public QuantizerBase<T>
 };
 
 template <class T> template <class ROW>
-std::enable_if_t<!std::is_same<value_t<iterator_value<ROW> >, u_char>::value,
+std::enable_if_t<!std::is_same<value_t<std::iter_value_t<ROW> >,
+			       u_char>::value,
 		 const Array2<size_t>&>
 Quantizer2<T>::operator ()(ROW ib, ROW ie, size_t nbins)
 {
-    using pair_type = std::pair<iterator_t<iterator_reference<ROW> >,
+    using pair_type = std::pair<iterator_t<std::iter_reference_t<ROW> >,
 				Array<size_t>::iterator>;
     
     _indices.resize(std::distance(ib, ie),

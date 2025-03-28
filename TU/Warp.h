@@ -58,7 +58,7 @@ class Warp
     class Interpolate
     {
       public:
-	using value_type = typename iterator_value<IN>::value_type;
+	using value_type = typename std::iter_value_t<IN>::value_type;
     
       public:
 	Interpolate(IN in)	:_in(in)		{}
@@ -415,7 +415,7 @@ Warp::warpLine(IN in, OUT out, const FracArray& frac) const
     using	T = std::conditional_t<(sizeof(value_type) > sizeof(int16_t)),
 				       int32_t, int16_t>;
     using	O = std::conditional_t<(sizeof(value_type) > sizeof(int16_t)),
-				       int32_t, iterator_value<OUT> >;
+				       int32_t, std::iter_value_t<OUT> >;
 	
     const auto	n = simd::vec<u_char>::floor(std::distance(u, ue));
 

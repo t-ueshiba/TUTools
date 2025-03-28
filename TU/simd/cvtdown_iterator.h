@@ -27,12 +27,12 @@ class cvtdown_iterator
     : public boost::iterator_adaptor<
 		 cvtdown_iterator<T, ITER, MASK>,
 		 ITER,
-		 replace_element<iterator_value<ITER>, vec<T> >,
+		 replace_element<std::iter_value_t<ITER>, vec<T> >,
 		 boost::single_pass_traversal_tag,
-		 replace_element<iterator_value<ITER>, vec<T> > >
+		 replace_element<std::iter_value_t<ITER>, vec<T> > >
 {
   private:
-    using src_type	= iterator_value<ITER>;
+    using src_type	= std::iter_value_t<ITER>;
     using super		= boost::iterator_adaptor<
 				cvtdown_iterator,
 				ITER,

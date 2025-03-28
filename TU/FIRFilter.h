@@ -24,20 +24,20 @@ class fir_filter_iterator
     : public boost::iterator_adaptor<fir_filter_iterator<D, COEFF, ITER>,
 				     ITER,
 				     replace_element<iterator_substance<ITER>,
-						     iterator_value<COEFF> >,
+						     std::iter_value_t<COEFF> >,
 				     boost::forward_traversal_tag,
 				     replace_element<iterator_substance<ITER>,
-						     iterator_value<COEFF> > >
+						     std::iter_value_t<COEFF> > >
 {
   private:
     using super	= boost::iterator_adaptor<
 			fir_filter_iterator,
 			ITER,
 			replace_element<iterator_substance<ITER>,
-					iterator_value<COEFF> >,
+					std::iter_value_t<COEFF> >,
 			boost::forward_traversal_tag,
 			replace_element<iterator_substance<ITER>,
-					iterator_value<COEFF> > >;
+					std::iter_value_t<COEFF> > >;
     
   public:
     using	typename super::value_type;

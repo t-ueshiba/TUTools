@@ -8,7 +8,7 @@
 
 #include <tuple>
 #include <utility>
-#include <iterator>
+#include <ranges>
 #include <boost/iterator/iterator_facade.hpp>
 #include <iostream>
 #include "TU/type_traits.h"	// for TU::any<PRED, T...>
@@ -583,9 +583,8 @@ template <class... T,
 inline auto
 begin(std::tuple<T...>& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::begin; return begin(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::begin; return begin(x); }, t));
 }
 
 template <class... T,
@@ -593,9 +592,8 @@ template <class... T,
 inline auto
 end(std::tuple<T...>& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::end; return end(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::end; return end(x); }, t));
 }
 
 template <class... T> inline auto
@@ -615,9 +613,8 @@ template <class... T,
 inline auto
 begin(std::tuple<T...>&& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::begin; return begin(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::begin; return begin(x); }, t));
 }
 
 template <class... T,
@@ -625,9 +622,8 @@ template <class... T,
 inline auto
 end(std::tuple<T...>&& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::end; return end(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::end; return end(x); }, t));
 }
 
 template <class... T> inline auto
@@ -647,9 +643,8 @@ template <class... T,
 inline auto
 begin(const std::tuple<T...>& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::begin; return begin(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::begin; return begin(x); }, t));
 }
 
 template <class... T,
@@ -657,9 +652,8 @@ template <class... T,
 inline auto
 end(const std::tuple<T...>& t)
 {
-    return make_zip_iterator(
-		tuple_transform([](auto& x)
-				{ using std::end; return end(x); }, t));
+    return make_zip_iterator(tuple_transform([](auto& x)
+			     { using std::end; return end(x); }, t));
 }
 
 template <class... T> inline auto

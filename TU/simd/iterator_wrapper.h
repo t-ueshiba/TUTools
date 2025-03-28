@@ -19,7 +19,7 @@ namespace simd
 //! 反復子をラップして名前空間 TU::simd に取り込むためのクラス
 /*!
   本クラスの目的は，以下の2つである．
-    (1)	iterator_value<ITER> がSIMDベクトル型となるあらゆる反復子を
+    (1)	std::iter_value_t<ITER> がSIMDベクトル型となるあらゆる反復子を
 	その機能を保持したまま名前を変更することにより，TU/algorithm.h にある
 	関数のオーバーロード版を呼び出せるようにすること．
     (2)	ITER が const T* 型または T* 型のとき，それぞれ load_iterator<T, true>
@@ -161,7 +161,7 @@ template <class T, bool ALIGNED, ptrdiff_t STRIDE, size_t SIZE> inline auto
 stride(const range_iterator<iterator_wrapper<T*, ALIGNED>, STRIDE, SIZE>& iter)
     -> decltype(iter.stride())
 {
-    using value_t = iterator_value<decltype(make_accessor(iter->begin()))>;
+    using value_t = std::iter_value_t<decltype(make_accessor(iter->begin()))>;
 
     return iter.stride() / value_t::size;
 }

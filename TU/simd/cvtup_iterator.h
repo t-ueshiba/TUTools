@@ -22,7 +22,7 @@ namespace detail
   class cvtup_proxy
   {
     public:
-      using value_type	= iterator_value<ITER>;
+      using value_type	= std::iter_value_t<ITER>;
       using self	= cvtup_proxy;
 
     private:

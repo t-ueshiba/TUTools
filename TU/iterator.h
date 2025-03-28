@@ -7,6 +7,7 @@
 #define TU_ITERATOR_H
 
 #include <iterator>
+#include <ranges>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include "TU/tuple.h"
 
@@ -46,22 +47,6 @@ rend(T&& x) -> decltype(std::rend(x))
 /************************************************************************
 *  type aliases								*
 ************************************************************************/
-//! 反復子が指す型
-template <class ITER>
-using iterator_value	  = typename std::iterator_traits<ITER>::value_type;
-
-//! 反復子が指す型への参照
-template <class ITER>
-using iterator_reference  = typename std::iterator_traits<ITER>::reference;
-
-//! 反復子が指す型へのポインタ
-template <class ITER>
-using iterator_pointer	  = typename std::iterator_traits<ITER>::pointer;
-    
-//! 2つの反復子間の差を表す型
-template <class ITER>
-using iterator_difference = typename std::iterator_traits<ITER>
-					::difference_type;
 //! 反復子のカテゴリ
 template <class ITER>
 using iterator_category	  = typename std::iterator_traits<ITER>
@@ -102,7 +87,7 @@ using iterator_t = decltype(detail::iterator_t(std::declval<E>()));
   \return	ITER が指す式に反復子が適用できればその型，適用できなければ void
 */
 template <class ITER>
-using iterator_iterator = iterator_t<iterator_value<ITER> >;
+using iterator_iterator = iterator_t<std::iter_value_t<ITER> >;
 
 //! 式が持つ逆反復子の型を返す
 /*!
@@ -120,7 +105,7 @@ using reverse_iterator_t = std::reverse_iterator<iterator_t<E> >;
   \return	E の反復子が指す型
 */
 template <class E>
-using value_t	= iterator_value<iterator_t<E> >;
+using value_t	= std::iter_value_t<iterator_t<E> >;
 
 namespace detail
 {
@@ -184,15 +169,15 @@ class map_iterator
 	ITER,
 	std::decay_t<
 	    decltype(TU::apply(std::declval<FUNC>(),
-			       std::declval<iterator_reference<ITER> >()))>,
+			       std::declval<std::iter_reference_t<ITER> >()))>,
 	boost::use_default,
 	decltype(TU::apply(std::declval<FUNC>(),
-			   std::declval<iterator_reference<ITER> >()))>
+			   std::declval<std::iter_reference_t<ITER> >()))>
 {
   private:
     using ref	= decltype(TU::apply(
 			       std::declval<FUNC>(),
-			       std::declval<iterator_reference<ITER> >()));
+			       std::declval<std::iter_reference_t<ITER> >()));
     using super	= boost::iterator_adaptor<map_iterator,
 					  ITER,
 					  std::decay_t<ref>,
@@ -235,7 +220,7 @@ make_map_iterator(FUNC&& func, const ITER&... iter)
   \param mbr	iterが指すオブジェクトのメンバへのポインタ
 */
 template <class ITER, class T> inline auto
-make_mbr_iterator(const ITER& iter, T iterator_value<ITER>::* mbr)
+make_mbr_iterator(const ITER& iter, T std::iter_value_t<ITER>::* mbr)
 {
     return make_map_iterator([mbr](auto&& x){ return x.*mbr; }, iter);
 }
@@ -247,7 +232,7 @@ make_mbr_iterator(const ITER& iter, T iterator_value<ITER>::* mbr)
 template <class ITER> inline auto
 make_first_iterator(const ITER& iter)
 {
-    return make_mbr_iterator(iter, &iterator_value<ITER>::first);
+    return make_mbr_iterator(iter, &std::iter_value_t<ITER>::first);
 }
     
 //! std::pairへの反復子からその第2要素に直接アクセスする反復子を作る．
@@ -257,7 +242,7 @@ make_first_iterator(const ITER& iter)
 template <class ITER> inline auto
 make_second_iterator(const ITER& iter)
 {
-    return make_mbr_iterator(iter, &iterator_value<ITER>::second);
+    return make_mbr_iterator(iter, &std::iter_value_t<ITER>::second);
 }
     
 /************************************************************************
@@ -363,7 +348,7 @@ template <class FUNC, class ITER>
 class assignment_iterator
     : public boost::iterator_adaptor<assignment_iterator<FUNC, ITER>,
 				     ITER,
-				     iterator_value<ITER>,
+				     std::iter_value_t<ITER>,
 				     iterator_category<ITER>,
 				     detail::assignment_proxy<FUNC, ITER> >
 {
@@ -371,7 +356,7 @@ class assignment_iterator
     using super	= boost::iterator_adaptor<
 				assignment_iterator,
 				ITER,
-				iterator_value<ITER>,
+				std::iter_value_t<ITER>,
 				iterator_category<ITER>,
 				detail::assignment_proxy<FUNC, ITER> >;
     friend	class boost::iterator_core_access;
@@ -412,7 +397,7 @@ template <class ROW>
 class row2col
 {
   public:
-    using argument_type	= iterator_reference<ROW>;
+    using argument_type	= std::iter_reference_t<ROW>;
     
   public:
 			row2col(size_t col)	:_col(col)		{}

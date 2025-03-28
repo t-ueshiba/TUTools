@@ -22,14 +22,14 @@ class shift_iterator
 				     ITER,
 				     boost::use_default,
 				     boost::forward_traversal_tag,
-				     iterator_value<ITER> >
+				     std::iter_value_t<ITER> >
 {
   private:
     typedef boost::iterator_adaptor<shift_iterator,
 				    ITER,
 				    boost::use_default,
 				    boost::forward_traversal_tag,
-				    iterator_value<ITER> >	super;
+				    std::iter_value_t<ITER> >	super;
 
   public:
     typedef typename super::value_type		value_type;

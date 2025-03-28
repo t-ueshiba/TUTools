@@ -23,7 +23,7 @@ namespace detail
   using map_iterator_argument_element
 		= typename std::conditional<
 			std::is_void<T>::value,
-			iterator_value<std::decay_t<tuple_head<ITERS> > >,
+			std::iter_value_t<std::decay_t<tuple_head<ITERS> > >,
 			vec<T> >::type::element_type;
 
   // ITERS(tuple かもしれない)の各要素を vec<T> に置き換えた型の引数を
@@ -62,7 +62,7 @@ class map_iterator
 
     template <class ITER_, class=void>
     struct vsize_impl	// ITER_  が detail::store_proxy の場合にも有効
-    {			// にするため，iterator_value<ITER_> は使わない
+    {			// にするため，std::iter_value_t<ITER_> は使わない
 	constexpr static auto
 		max = vsize_impl<typename ITER_::value_type>::max;
     };
@@ -122,13 +122,13 @@ class map_iterator
 
   // 反復子を convert up
     template <bool, size_t N_, class ITER_,
-	      std::enable_if_t<iterator_value<ITER_>::size == N_>* = nullptr>
+	      std::enable_if_t<std::iter_value_t<ITER_>::size == N_>* = nullptr>
     static auto	cvtup(ITER_& iter)	// 反復子が指す vec のサイズが
 		{			// 要求値 _N に等しければ
 		    return *iter++;	// vec を返してインクリメント
 		}
     template <bool, size_t N_, class ITER_>
-    static std::enable_if_t<iterator_value<ITER_>::size != N_, ITER_&>
+    static std::enable_if_t<std::iter_value_t<ITER_>::size != N_, ITER_&>
 		cvtup(ITER_& iter)	// 反復子が指す vec のサイズが
 		{			// 要求値 _N でなければ
 		    return iter;	// 反復子そのものへの参照を返す
@@ -171,13 +171,13 @@ class map_iterator
 
   // 反復子を convert down
     template <size_t N_, class ITER_,
-	      std::enable_if_t<iterator_value<ITER_>::size == N_>* = nullptr>
+	      std::enable_if_t<std::iter_value_t<ITER_>::size == N_>* = nullptr>
     static auto	cvtdown(ITER_& iter)		  // 反復子が指す vec のサイズが
 		{				  // 要求値 _N に等しければ
 		    return cvtdown<N_>(*iter++);  // vec を返してインクリメント
 		}
     template <size_t N_, class ITER_,
-	      std::enable_if_t<(iterator_value<ITER_>::size < N_)>* = nullptr>
+	      std::enable_if_t<(std::iter_value_t<ITER_>::size < N_)>* = nullptr>
     static auto	cvtdown(ITER_& iter)		// 反復子が指す vec のサイズが
 		{				// 要求値 _N よりも小さければ
 		    const auto	x = cvtdown<N_/2>(iter);  // 要求値を半分にして
