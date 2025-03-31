@@ -78,7 +78,8 @@ namespace detail
    *  等しく，コストが高い処理である．そこで，ベクトル積を評価せずその評価結果の
    *  サイズだけを得るために，以下のオーバーロードを導入する．
    */
-  template <class OP, class L, class R>	class product_opnode;
+  template <class OP, std::ranges::sized_range L, std::ranges::sized_range R>
+  class product_opnode;
   struct bit_xor;
     
   template <class L, class R> constexpr size_t

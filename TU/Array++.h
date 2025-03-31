@@ -999,7 +999,7 @@ namespace detail
     \param L	積演算子の第1引数となる式の型
     \param R	積演算子の第2引数となる式の型
    */
-  template <class OP, class L, class R>
+  template <class OP, std::ranges::sized_range L, std::ranges::sized_range R>
   class product_opnode : public opnode<product_opnode<OP, L, R> >
   {
     private:
@@ -1008,7 +1008,7 @@ namespace detail
 	// R が tranpose_opnode であれば中身の評価結果の転置．
 	// そうでない opnode に変換可能（参照型も可）であれば，その評価結果の型，
 	// opnode に変換できなければ R そのもの．
-	  template <class E_>
+	  template <std::ranges::sized_range E_>
 	  using cache_t	= std::conditional_t<
 				is_transposed<E_>::value,
 				decltype(
@@ -1018,11 +1018,11 @@ namespace detail
 				decltype(evaluate(std::declval<E_>()))>;
 
 	public:
-	  template <class R_,
+	  template <std::ranges::sized_range R_,
 		    std::enable_if_t<!is_transposed<R_>::value>* = nullptr>
 		binder2nd(OP op, R_&& r)
 		    :_r(std::forward<R_>(r)), _op(op)			{}
-	  template <class R_,
+	  template <std::ranges::sized_range R_,
 		    std::enable_if_t<is_transposed<R_>::value>* = nullptr>
 		binder2nd(OP op, R_&& r)
 		    :_r(transpose(std::forward<R_>(r))), _op(op)	{}
@@ -1081,14 +1081,15 @@ namespace detail
       const binder2nd	_binder;
   };
 
-  template <class OP, class L, class R> inline auto
+  template <class OP, std::ranges::sized_range L, std::ranges::sized_range R>
+  inline auto
   make_product_opnode(L&& l, R&& r, OP op)
   {
       return product_opnode<OP, L, R>(std::forward<L>(l),
 				      std::forward<R>(r), op);
   }
 
-  template <class L, class R>
+  template <std::ranges::sized_range L, std::ranges::sized_range R>
   class lincomb_opnode : public opnode<lincomb_opnode<L, R> >
   {
     private:
@@ -1177,8 +1178,8 @@ namespace detail
   \param r	右辺の1次元配列式
   \return	内積の評価結果
 */
-template <class L, class R,
-	  std::enable_if_t<rank<L>() == 1 && rank<R>() == 1>* = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (rank<L>() == 1 && rank<R>() == 1)
 inline auto
 operator *(const L& l, const R& r)
 {
@@ -1197,9 +1198,8 @@ operator *(const L& l, const R& r)
   \param r	転置されていない2次元配列式
   \return	線型結合を表す演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<rank<L>() == 1 && rank<R>() == 2 &&
-			   !is_transposed<R>::value>* = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (rank<L>() == 1 && rank<R>() == 2 && !is_transposed<R>::value)
 inline auto
 operator *(L&& l, R&& r)
 {
@@ -1216,12 +1216,11 @@ operator *(L&& l, R&& r)
   \param r	右辺の1または2次元配列式
   \return	積を表す演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<((!is_transposed<L>::value && rank<L>() == 2) &&
-			    (rank<R>() == 1 || rank<R>() == 2)) ||
-			   (is_transposed<L>::value &&
-			    (!is_transposed<R>::value && rank<R>() == 2))>*
-	  = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (((!is_transposed<L>::value && rank<L>() == 2) &&
+	   (rank<R>() == 1 || rank<R>() == 2)) ||
+	  (is_transposed<L>::value &&
+	   (!is_transposed<R>::value && rank<R>() == 2)))
 inline auto
 operator *(L&& l, R&& r)
 {
@@ -1240,11 +1239,10 @@ operator *(L&& l, R&& r)
   \param r	1次元配列式または転置された2次元配列式
   \return	転置された演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<(is_transposed<L>::value &&
-			    (is_transposed<R>::value || rank<R>() == 1)) ||
-			   (rank<L>() == 1 && is_transposed<R>::value)>*
-	  = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires ((is_transposed<L>::value &&
+	   (is_transposed<R>::value || rank<R>() == 1)) ||
+	  (rank<L>() == 1 && is_transposed<R>::value))
 inline auto
 operator *(L&& l, R&& r)
 {
@@ -1258,8 +1256,8 @@ operator *(L&& l, R&& r)
   \param r	右辺の1次元配列式
   \return	外積を表す演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<rank<L>() == 1 && rank<R>() == 1>* = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (rank<L>() == 1 && rank<R>() == 1)
 inline auto
 operator %(L&& l, R&& r)
 {
@@ -1277,10 +1275,9 @@ operator %(L&& l, R&& r)
   \param r	右辺の1次元配列式
   \return	ベクトル積の評価結果を表す1次元配列
 */
-template <class L, class R>
-inline std::enable_if_t<rank<L>() == 1 && rank<R>() == 1,
-			Array<std::common_type_t<element_t<L>,
-						 element_t<R> >, 3> >
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (rank<L>() == 1 && rank<R>() == 1)
+inline Array<std::common_type_t<element_t<L>, element_t<R> >, 3>
 operator ^(const L& l, const R& r)
 {
 #ifdef TU_DEBUG
@@ -1302,8 +1299,8 @@ operator ^(const L& l, const R& r)
   \param r	右辺の1次元配列式
   \return	ベクトル積を表す演算子ノード
 */
-template <class L, class R, std::enable_if_t<rank<L>() == 2 &&
-					     rank<R>() == 1>* = nullptr>
+template <std::ranges::sized_range L, std::ranges::sized_range R>
+requires (rank<L>() == 2 && rank<R>() == 1)
 inline auto
 operator ^(L&& l, R&& r)
 {
