@@ -191,7 +191,18 @@ class map_iterator
   public:
 		map_iterator(FUNC&& func, const ITER& iter)
 		    :super(iter), _func(std::forward<FUNC>(func))	{}
-
+		map_iterator()	:super(ITER()), _func()			{}
+		map_iterator(const map_iterator&)		= default;
+		map_iterator(map_iterator&&)			= default;
+    map_iterator&
+     		operator =(map_iterator&&)			= default;
+    map_iterator&
+		operator =(const map_iterator& iter)
+		{
+		    *this = map_iterator(iter);
+		    return *this;
+		}
+    
     const auto&	functor()	const	{ return _func; }
 	
   private:

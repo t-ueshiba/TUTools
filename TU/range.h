@@ -21,19 +21,15 @@ namespace TU
   \param E	式の型
   \return	式の次元数
 */
-template <class E>
-constexpr std::enable_if_t<!is_iterable<E>::value || is_tuple<E>::value,
-			   size_t>
+template <class E> requires (!std::ranges::range<E>) constexpr size_t
 rank()
 {
     return 0;
 }
-template <class E>
-constexpr std::enable_if_t<is_iterable<E>::value && !is_tuple<E>::value,
-			   size_t>
+template <std::ranges::range E> constexpr size_t
 rank()
 {
-    return 1 + rank<value_t<E> >();
+    return 1 + rank<std::ranges::range_value_t<E> >();
 }
     
 /************************************************************************
@@ -91,15 +87,16 @@ namespace detail
       return 3;
   }
 
-  template <class E> inline auto
+  template <std::ranges::sized_range E> inline auto
   size(const E& expr, std::integral_constant<size_t, 0>)
   {
-      return std::size(expr);
+      return std::ranges::size(expr);
   }
-  template <size_t I, class E> inline auto
+  template <size_t I, std::ranges::range E> inline auto
   size(const E& expr, std::integral_constant<size_t, I>)
   {
-      return size(*std::begin(expr), std::integral_constant<size_t, I-1>());
+      return size(*std::ranges::begin(expr),
+		  std::integral_constant<size_t, I-1>());
   }
 }	// namespace detail
 
@@ -109,8 +106,7 @@ namespace detail
   \param E	式の型
   \return	軸Iの要素数
  */
-template <size_t I, class E, std::enable_if_t<rank<E>() != 0>* = nullptr>
-inline auto
+template <size_t I, std::ranges::range E> inline auto
 size(const E& expr)
 {
     return detail::size(expr, std::integral_constant<size_t, I>());
@@ -526,7 +522,8 @@ namespace detail
   struct stride_and_size
   {
       using stride_t	= ptrdiff_t;
-      
+
+      stride_and_size()				= default;
       stride_and_size(stride_t, size_t)		{}
       constexpr static stride_t	stride()	{ return STRIDE; }
       constexpr static size_t	size()		{ return SIZE; }
@@ -536,6 +533,7 @@ namespace detail
   {
       using stride_t	= DIFF;
       
+      stride_and_size()				= default;
       stride_and_size(stride_t stride, size_t)
 	  :_stride(stride)			{}
       stride_t			stride() const	{ return _stride; }
@@ -549,6 +547,7 @@ namespace detail
   {
       using stride_t	= ptrdiff_t;
       
+      stride_and_size()				= default;
       stride_and_size(stride_t, size_t size)
 	  :_size(size)				{}
       constexpr static stride_t	stride()	{ return STRIDE; }
@@ -562,6 +561,7 @@ namespace detail
   {
       using stride_t	= DIFF;
       
+      stride_and_size()				= default;
       stride_and_size(stride_t stride, size_t size)
 	  :_stride(stride), _size(size)		{}
       stride_t			stride() const	{ return _stride; }
@@ -604,6 +604,7 @@ class range_iterator
     friend class	boost::iterator_core_access;
 	  
   public:
+		range_iterator()				= default;
 		range_iterator(ITER iter,
 			       iterator_stride<ITER> stride=STRIDE,
 			       size_t size=SIZE)
@@ -990,6 +991,7 @@ class column_iterator
     friend	class boost::iterator_core_access;
 
   public:
+		column_iterator()				= default;
 		column_iterator(ROW row, size_t nrows, size_t col)
 		    :super(col), _row(row), _nrows(nrows)
 		{
@@ -1117,7 +1119,8 @@ namespace detail
     \param OP	各成分に適用される演算子の型
     \param E	演算子の引数となる式または式への参照の型
   */
-  template <class OP, class E0, class... E>
+  template <class OP,
+	    std::ranges::sized_range E0, std::ranges::sized_range... E>
   class generic_opnode : public opnode<generic_opnode<OP, E0, E...> >
   {
     private:
@@ -1137,19 +1140,19 @@ namespace detail
 		}
       auto	begin()	const
 		{
-		    using	TU::begin;
-
+		    using TU::begin;
+		    
 		    return make_map_iterator(_op, begin(_expr));
 		}
       auto	end() const
 		{
-		    using	TU::end;
-
+		    using TU::end;
+		    
 		    return make_map_iterator(_op, end(_expr));
 		}
       auto	size() const
 		{
-		    using	std::size;
+		    using std::size;
 		    
 		    return size(_expr);
 		}
@@ -1162,10 +1165,11 @@ namespace detail
       
     private:
       const OP		_op;
-      const expr_t	_expr;
+      const expr_t	_expr;	// E が空でなければ tuple になる
   };
     
-  template <class OP, class... E> inline generic_opnode<OP, E...>
+  template <class OP, std::ranges::sized_range... E>
+  inline generic_opnode<OP, E...>
   make_generic_opnode(OP&& op, E&&... expr)
   {
     // exprの実引数がX&&型(X型の一時オブジェクト)ならば E = X,
@@ -1180,7 +1184,7 @@ namespace detail
   \param expr	式
   \return	符号反転演算子ノード
 */
-template <class E, std::enable_if_t<rank<E>() != 0>* = nullptr> inline auto
+template <std::ranges::sized_range E> inline auto
 operator -(E&& expr)
 {
     return detail::make_generic_opnode(
@@ -1194,7 +1198,7 @@ operator -(E&& expr)
   \param c	乗数
   \return	乗算演算子ノード
 */
-template <class E, std::enable_if_t<rank<E>() != 0>* = nullptr> inline auto
+template <std::ranges::sized_range E> inline auto
 operator *(E&& expr, element_t<E> c)
 {
     return detail::make_generic_opnode(
@@ -1208,7 +1212,7 @@ operator *(E&& expr, element_t<E> c)
   \param expr	式
   \return	乗算演算子ノード
 */
-template <class E, std::enable_if_t<rank<E>() != 0>* = nullptr> inline auto
+template <std::ranges::sized_range E> inline auto
 operator *(element_t<E> c, E&& expr)
 {
     return detail::make_generic_opnode(
@@ -1222,7 +1226,7 @@ operator *(element_t<E> c, E&& expr)
   \param c	除数
   \return	除算演算子ノード
 */
-template <class E, std::enable_if_t<rank<E>() != 0>* = nullptr> inline auto
+template <std::ranges::sized_range E> inline auto
 operator /(E&& expr, element_t<E> c)
 {
     return detail::make_generic_opnode(
@@ -1236,7 +1240,7 @@ operator /(E&& expr, element_t<E> c)
   \param c	乗数
   \return	各要素にcが掛けられた結果の式
 */
-template <class E> inline std::enable_if_t<rank<E>() != 0, E&>
+template <std::ranges::sized_range E> inline E&
 operator *=(E&& expr, element_t<E> c)
 {
     using std::size;
@@ -1252,7 +1256,7 @@ operator *=(E&& expr, element_t<E> c)
   \param c	除数
   \return	各要素がcで割られた結果の式
 */
-template <class E> inline std::enable_if_t<rank<E>() != 0, E&>
+template <std::ranges::sized_range E> inline E&
 operator /=(E&& expr, element_t<E> c)
 {
     using std::size;
@@ -1268,8 +1272,8 @@ operator /=(E&& expr, element_t<E> c)
   \param r	右辺の式
   \return	加算演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<rank<L>() != 0 && rank<L>() == rank<R>()>* = nullptr>
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
 inline auto
 operator +(L&& l, R&& r)
 {
@@ -1285,8 +1289,8 @@ operator +(L&& l, R&& r)
   \param r	右辺の式
   \return	減算演算子ノード
 */
-template <class L, class R,
-	  std::enable_if_t<rank<L>() != 0 && rank<L>() == rank<R>()>* = nullptr>
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
 inline auto
 operator -(L&& l, R&& r)
 {
@@ -1302,8 +1306,9 @@ operator -(L&& l, R&& r)
   \param r	右辺の式
   \return	各要素が加算された左辺の式
 */
-template <class L, class R>
-inline std::enable_if_t<rank<L>() != 0 && rank<L>() == rank<R>(), L&>
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
+inline L&
 operator +=(L&& l, const R& r)
 {
     using std::size;
@@ -1320,8 +1325,9 @@ operator +=(L&& l, const R& r)
   \param r	右辺の式
   \return	各要素が減じられた左辺の式
 */
-template <class L, class R>
-inline std::enable_if_t<rank<L>() != 0 && rank<L>() == rank<R>(), L&>
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
+inline L&
 operator -=(L&& l, const R& r)
 {
     using std::size;
@@ -1340,7 +1346,7 @@ namespace detail
   /**********************************************************************
   *  class transpose_opnode<E>						*
   **********************************************************************/
-  template <class E>
+  template <std::ranges::sized_range E>
   class transpose_opnode : public opnode<transpose_opnode<E> >
   {
     public:
@@ -1352,7 +1358,7 @@ namespace detail
       constexpr static auto
 		size0()
 		{
-		    return TU::size0<value_t<E> >();
+		    return TU::size0<std::ranges::range_value_t<E> >();
 		}
       auto	begin()	const
 		{
@@ -1395,7 +1401,7 @@ using is_transposed = is_convertible<E, detail::transpose_opnode>;
   \param expr	スカラまたは1次元配列式
   \return	expr への定数参照
  */
-template <class E> inline std::enable_if_t<(rank<E>() < 2), E&&>
+template <class E> requires (rank<E>() < 2) inline E&&
 transpose(E&& expr)
 {
     return std::forward<E>(expr);
@@ -1406,8 +1412,8 @@ transpose(E&& expr)
   \param expr	2次元配列式
   \return	expr を転置した2次元配列式
  */ 
-template <class E, std::enable_if_t<rank<E>() == 2 &&
-				    !is_transposed<E>::value>* = nullptr>
+template <std::ranges::sized_range E>
+requires (rank<E>() == 2 && !is_transposed<E>::value)
 inline auto
 transpose(E&& expr)
 {
@@ -1419,8 +1425,8 @@ transpose(E&& expr)
   \param r	転置された2次元配列式を表すレンジ
   \return	r をさらに転置した2次元配列式
  */ 
-template <class E, std::enable_if_t<rank<E>() == 2 &&
-				    is_transposed<E>::value>* = nullptr>
+template <std::ranges::sized_range E>
+requires (rank<E>() == 2 && is_transposed<E>::value)
 inline decltype(auto)
 transpose(E&& expr)
 {
@@ -1435,7 +1441,7 @@ transpose(E&& expr)
   \param x	式
   \return	式の各要素の自乗和
 */
-template <class E, std::enable_if_t<(rank<E>() != 0)>* = nullptr> inline auto
+template <std::ranges::range E> inline auto
 square(const E& expr)
 {
     using	std::size;
@@ -1448,10 +1454,10 @@ square(const E& expr)
   \param x	式
   \return	式の各要素の自乗和の平方根
 */
-template <class T> inline auto
-length(const T& x)
+template <std::ranges::range E> inline auto
+length(const E& expr)
 {
-    return std::sqrt(square(x));
+    return std::sqrt(square(expr));
 }
     
 //! 与えられた二つの式の各要素の差の自乗和を求める.
@@ -1460,7 +1466,9 @@ length(const T& x)
   \param y	第2の式
   \return	xとyの各要素の差の自乗和
 */
-template <class L, class R> inline auto
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
+inline auto
 square_distance(const L& x, const R& y)
 {
     return square(x - y);
@@ -1472,7 +1480,9 @@ square_distance(const L& x, const R& y)
   \param y	第2の式
   \return	xとyの各要素の差の自乗和の平方根
 */
-template <class L, class R> inline auto
+template <std::ranges::sized_range L,
+	  std::ranges::sized_range R> requires (rank<L>() == rank<R>())
+inline auto
 distance(const L& x, const R& y)
 {
     return std::sqrt(square_distance(x, y));
@@ -1486,15 +1496,15 @@ distance(const L& x, const R& y)
 		  \TUvec{e}{}\leftarrow\frac{\TUvec{e}{}}{\TUnorm{\TUvec{e}{}}}
 		\f$
 */
-template <class E> inline std::enable_if_t<rank<E>() != 0, E&>
+template <std::ranges::sized_range E> inline E&
 normalize(E&& expr)
 {
     return expr /= length(expr);
 }
 
-template <class E, class T>
-inline std::enable_if_t<rank<E>() == 1 && std::is_arithmetic<T>::value,
-			element_t<E> >
+template <std::ranges::sized_range E,
+	  std::floating_point T> requires (rank<E>() == 1)
+inline element_t<E>
 at(const E& expr, T x)
 {
     const auto	x0 = std::floor(x);
@@ -1503,9 +1513,9 @@ at(const E& expr, T x)
     return (dx ? (1 - dx) * expr[i] + dx * expr[i+1] : expr[i]);
 }
 
-template <class E, class T>
-inline std::enable_if_t<rank<E>() == 2 && std::is_arithmetic<T>::value,
-			element_t<E> >
+template <std::ranges::sized_range E,
+	  std::floating_point T> requires (rank<E>() == 2)
+inline element_t<E>
 at(const E& expr, T x, T y)
 {
     const auto	y0 = std::floor(y);
